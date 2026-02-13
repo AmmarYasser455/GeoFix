@@ -1,0 +1,16 @@
+chainlit>=1.1.300
+langchain
+langchain-community
+langchain-core
+langchain-ollama
+langchain-google-genai
+python-dotenv
+geopandas
+shapely
+networkx
+pandas
+scipy
+rtree
+pyogrio
+fiona
+click

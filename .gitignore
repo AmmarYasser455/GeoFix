@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.pyc
+*.egg-info/
+build/
+dist/
+
+# GeoFix
+_geofix_temp/
+geofix_output/
+geofix_audit.db
+*.gpkg
+*.shp
+*.shx
+*.dbf
+*.prj
+*.cpg
+*.geojson
+*.zip
+
+# Environment
+.env
+venv/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+
+# Chainlit
+.chainlit/translations/
+# Keep config.toml as it has UI settings

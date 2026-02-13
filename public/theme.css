@@ -1,0 +1,188 @@
+/* ============================================================
+   GeoFix — Professional Dark Theme
+   Clean, flat, high-contrast dark mode (GitHub/VS Code style)
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Newsreader:ital,wght@0,400;0,500;1,400&display=swap');
+
+/* ── Root Variables ──────────────────────────────────────────── */
+:root {
+  /* Neutral Dark Palette */
+  --gf-bg-primary: #0d1117;
+  /* Main background (GitHub Dim) */
+  --gf-bg-secondary: #161b22;
+  /* Sidebar/Cards */
+  --gf-bg-tertiary: #21262d;
+  /* Inputs/Elements */
+  --gf-bg-hover: #30363d;
+
+  --gf-text-primary: #f0f6fc;
+  --gf-text-secondary: #8b949e;
+  --gf-text-muted: #6e7681;
+
+  /* Subtle Accents (Blue/Purple) */
+  --gf-accent: #58a6ff;
+  /* GitHub Blue */
+  --gf-accent-hover: #79c0ff;
+  --gf-success: #2ea043;
+  --gf-warning: #d29922;
+  --gf-error: #f85149;
+  --gf-border: #30363d;
+
+  --gf-radius: 6px;
+  /* Tighter, more professional radius */
+  --gf-font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* ── Global ──────────────────────────────────────────────────── */
+body,
+html {
+  font-family: var(--gf-font) !important;
+  background: var(--gf-bg-primary) !important;
+  color: var(--gf-text-primary) !important;
+}
+
+/* ── Overrides ───────────────────────────────────────────────── */
+
+/* Backgrounds */
+.MuiDrawer-paper,
+.MuiAppBar-root,
+.MuiPaper-root {
+  background-color: var(--gf-bg-primary) !important;
+  border-right: 1px solid var(--gf-border) !important;
+  border-bottom: 1px solid var(--gf-border) !important;
+  box-shadow: none !important;
+}
+
+/* Sidebar items */
+.MuiListItemButton-root {
+  border-radius: var(--gf-radius) !important;
+  margin: 4px 8px !important;
+  color: var(--gf-text-secondary) !important;
+}
+
+.MuiListItemButton-root:hover {
+  background-color: var(--gf-bg-tertiary) !important;
+  color: var(--gf-text-primary) !important;
+}
+
+.MuiListItemButton-root.Mui-selected {
+  background-color: rgba(56, 139, 253, 0.1) !important;
+  color: var(--gf-accent) !important;
+  border-left: 3px solid var(--gf-accent) !important;
+}
+
+/* ── Chat Messages ───────────────────────────────────────────── */
+
+/* User Message */
+.cl-message[data-author="user"] {
+  background-color: var(--gf-bg-tertiary) !important;
+  border: 1px solid var(--gf-border) !important;
+  border-radius: var(--gf-radius) !important;
+  padding: 12px 16px !important;
+  color: var(--gf-text-primary) !important;
+}
+
+/* Assistant Message */
+.cl-message[data-author="GeoFix"] {
+  background-color: transparent !important;
+  /* Clean look */
+  padding: 12px 16px !important;
+}
+
+/* ── Input Area ──────────────────────────────────────────────── */
+.MuiOutlinedInput-root {
+  background-color: var(--gf-bg-secondary) !important;
+  border-radius: var(--gf-radius) !important;
+  border: 1px solid var(--gf-border) !important;
+  box-shadow: none !important;
+}
+
+.MuiOutlinedInput-root.Mui-focused {
+  border-color: var(--gf-accent) !important;
+  box-shadow: 0 0 0 2px rgba(88, 166, 255, 0.2) !important;
+}
+
+.MuiOutlinedInput-notchedOutline {
+  border: none !important;
+}
+
+/* Buttons */
+.MuiButton-contained {
+  background-color: #238636 !important;
+  /* GitHub Green */
+  color: white !important;
+  box-shadow: none !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+  border-radius: var(--gf-radius) !important;
+  border: 1px solid rgba(240, 246, 252, 0.1) !important;
+}
+
+.MuiButton-contained:hover {
+  background-color: #2ea043 !important;
+}
+
+/* ── Typography & Elements ───────────────────────────────────── */
+a {
+  color: var(--gf-accent) !important;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+code {
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace !important;
+  background-color: rgba(110, 118, 129, 0.4) !important;
+  border-radius: 4px !important;
+  padding: 0.2em 0.4em !important;
+  font-size: 85% !important;
+}
+
+/* Tables */
+.markdown-body table {
+  display: block;
+  width: 100%;
+  overflow: auto;
+  border-spacing: 0;
+  border-collapse: collapse;
+}
+
+.markdown-body table tr {
+  background-color: var(--gf-bg-primary) !important;
+  border-top: 1px solid var(--gf-border) !important;
+}
+
+.markdown-body table tr:nth-child(2n) {
+  background-color: var(--gf-bg-secondary) !important;
+}
+
+.markdown-body table th,
+.markdown-body table td {
+  padding: 6px 13px !important;
+  border: 1px solid var(--gf-border) !important;
+}
+
+/* Hide watermarks */
+[class*="watermark"] {
+  display: none !important;
+}
+
+/* ── Animations ──────────────────────────────────────────────── */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.cl-message {
+  animation: slideIn 0.3s ease-out forwards;
+}

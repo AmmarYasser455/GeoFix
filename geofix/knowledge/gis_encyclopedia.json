@@ -1,0 +1,29 @@
+{
+    "concepts": {
+        "topology": "Topology in GIS defines the spatial relationships between features. It ensures data integrity by enforcing rules like 'polygons must not overlap' or 'lines must allow connection'.",
+        "polygon": "A closed shape defined by a series of connected points (vertices) where the first and last point are the same.",
+        "linestring": "A line defined by a series of connected points. Used for roads, rivers, etc.",
+        "crs": "Coordinate Reference System (CRS) defines how the two-dimensional, projected map relates to the real places on the earth.",
+        "quality_control": "Quality Control (QC) in GIS involves verifying that data meets defined standards for accuracy, completeness, and consistency. It often uses automated checks for topological errors.",
+        "data_quality": "Data quality measures how well a dataset fits its intended use. Key metrics include spatial accuracy, attribute accuracy, logical consistency, and completeness.",
+        "accuracy": "Accuracy refers to how close a measured value (like a coordinate) is to the true value.",
+        "logic": "My logic is based on the **OVC (Overlaps, Voids, Conflicts)** pipeline. I use geometric rules to detect topological errors (like overlapping buildings) and then apply decision trees to suggest fixes.",
+        "pipeline": "The processing pipeline consists of: 1. Data Loading & Profiling. 2. Error Detection (OVC). 3. Decision Engine (Rule-based). 4. Automated Repair. 5. Validation.",
+        "ovc": "OVC stands for Overlaps, Voids, and Conflicts. It is a standard framework for classifying topological errors in geospatial vector data."
+    },
+    "errors": {
+        "overlap": "An overlap occurs when two or more polygons cover the same area. In a building footprint dataset, this is usually an error because two buildings cannot occupy the same physical space.",
+        "gap": "A gap is a space between two polygons that should be adjacent (share a boundary). This often happens due to digitizing errors.",
+        "sliver": "A sliver polygon is a small, thin polygon often created during the overlay of two layers or by imperfect digitization. They are usually artifacts and should be merged into neighbors.",
+        "self_intersection": "A self-intersection means a polygon's boundary crosses itself (like a figure-8). This makes the geometry invalid in most GIS systems and must be fixed (often by buffering by 0).",
+        "dangle": "A dangle is a line feature that does not connect to another line feature at one or both ends. In road networks, dangles are often errors unless they are dead-ends.",
+        "duplicate_vertex": "Consecutive vertices at the exact same location. They add file size without adding detailed shape.",
+        "null_geometry": "A feature record that has no spatial data (geometry is empty or NULL). These should usually be deleted."
+    },
+    "solutions": {
+        "fix_overlap": "Overlaps can be fixed by: 1. Merging (Union) the features. 2. Cutting (Difference) the overlapping part from one feature. 3. Deleting the smaller feature.",
+        "fix_gap": "Gaps can be fixed by snapping vertices together or merging the gap area into the largest neighbor.",
+        "fix_sliver": "Slivers are fixed by merging them into the neighbor with the longest shared border.",
+        "fix_self_intersection": "Use the 'buffer(0)' trick or 'make_valid' function in PostGIS/Shapely to untie the knot."
+    }
+}
