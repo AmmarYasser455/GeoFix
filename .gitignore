@@ -9,6 +9,7 @@ dist/
 _geofix_temp/
 geofix_output/
 geofix_audit.db
+doc/
 *.gpkg
 *.shp
 *.shx
