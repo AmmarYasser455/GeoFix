@@ -37,11 +37,7 @@ class Complexity(Enum):
     COMPLEX = "complex"
 
 
-MODEL_MAP = {
-    Complexity.SIMPLE: "llama3.1:latest",
-    Complexity.MEDIUM: "llama3.1:latest",
-    Complexity.COMPLEX: "llama3.1:latest",
-}
+from geofix.core.config import DEFAULT_CONFIG
 
 
 def classify_complexity(query: str, history_len: int = 0) -> Complexity:
@@ -78,6 +74,13 @@ def select_model(
         return user_override
 
     complexity = classify_complexity(query, history_len)
-    model = MODEL_MAP[complexity]
+    
+    if complexity == Complexity.SIMPLE:
+        model = DEFAULT_CONFIG.router.simple_model
+    elif complexity == Complexity.MEDIUM:
+        model = DEFAULT_CONFIG.router.medium_model
+    else:
+        model = DEFAULT_CONFIG.router.complex_model
+
     logger.info("Router: %s → %s (%s)", query[:40], model, complexity.value)
     return model

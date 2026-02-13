@@ -20,7 +20,7 @@ class LLMConfig:
     """LLM provider settings."""
 
     provider: str = "ollama"
-    model: str = "llama3.1:latest"
+    model: str = "llama3.2"
     temperature: float = 0.1
     max_tokens: int = 2048
     fallback_model: str = "mistral"
@@ -63,7 +63,7 @@ class RouterConfig:
     auto_route: bool = True
     simple_model: str = "llama3.2"
     medium_model: str = "llama3.2"
-    complex_model: str = "llama3.1:latest"
+    complex_model: str = "deepseek-r1:14b"
 
 
 @dataclass(frozen=True)
