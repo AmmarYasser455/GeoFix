@@ -1,6 +1,7 @@
 """LangChain agent setup for the GeoFix conversational interface.
 
 Uses LangChain's tool-calling LLM with Ollama (local) or Google Gemini.
+Supports per-invocation model switching and context window management.
 """
 
 from __future__ import annotations
@@ -8,7 +9,7 @@ from __future__ import annotations
 import logging
 import os
 
-from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
+from langchain_core.messages import AIMessage, HumanMessage, SystemMessage, ToolMessage
 
 from geofix.chat.prompts import SYSTEM_PROMPT
 from geofix.chat.tools import ALL_TOOLS
@@ -16,16 +17,20 @@ from geofix.core.config import GeoFixConfig, DEFAULT_CONFIG
 
 logger = logging.getLogger("geofix.chat.agent")
 
+MAX_HISTORY_MESSAGES = 40
+MAX_AGENT_STEPS = 10
 
-def _create_llm(config: GeoFixConfig):
+
+def _create_llm(config: GeoFixConfig, model_override: str | None = None):
     """Create the LLM instance based on config.llm.provider."""
     provider = config.llm.provider
+    model = model_override or config.llm.model
 
     if provider == "ollama":
         from langchain_ollama import ChatOllama
 
         return ChatOllama(
-            model=config.llm.model,
+            model=model,
             temperature=config.llm.temperature,
             base_url=config.llm.ollama_base_url,
         )
@@ -33,12 +38,27 @@ def _create_llm(config: GeoFixConfig):
         from langchain_google_genai import ChatGoogleGenerativeAI
 
         return ChatGoogleGenerativeAI(
-            model=config.llm.model,
+            model=model,
             temperature=config.llm.temperature,
             max_output_tokens=config.llm.max_tokens,
         )
     else:
         raise ValueError(f"Unknown LLM provider: {provider}")
+
+
+def _trim_history(messages: list, max_messages: int = MAX_HISTORY_MESSAGES) -> list:
+    """Keep only the most recent messages to respect context window limits.
+
+    Always preserves the system message at index 0.
+    """
+    if len(messages) <= max_messages + 1:
+        return messages
+
+    system = [m for m in messages if isinstance(m, SystemMessage)]
+    non_system = [m for m in messages if not isinstance(m, SystemMessage)]
+
+    trimmed = non_system[-(max_messages):]
+    return system + trimmed
 
 
 class GeoFixAgent:
@@ -48,6 +68,7 @@ class GeoFixAgent:
     """
 
     def __init__(self, config: GeoFixConfig = DEFAULT_CONFIG):
+        self.config = config
         self.llm = _create_llm(config)
         self.llm_with_tools = self.llm.bind_tools(ALL_TOOLS)
         self.system_msg = SystemMessage(content=SYSTEM_PROMPT)
@@ -58,25 +79,26 @@ class GeoFixAgent:
         Handles tool calls automatically — if the LLM calls a tool,
         the tool is executed and the result is fed back to the LLM.
         """
-        # Dynamic Tool Binding:
-        # If no file is uploaded, HIDE the processing tools so the LLM cannot use them.
-        # This prevents hallucinations during small talk.
-        from geofix.chat.tools import get_state, ALL_TOOLS, consult_encyclopedia, get_audit_log
-        
-        has_file = get_state("buildings_path") is not None
-        
-        if has_file:
-            available = ALL_TOOLS
-        else:
-            # Only allow harmless tools
-            available = [consult_encyclopedia, get_audit_log]
+        result_parts = []
+        for token in self.stream(user_input, chat_history):
+            result_parts.append(token)
+        return "".join(result_parts) or "Done."
 
-        # Re-bind tools for this turn
+    def stream(self, user_input: str, chat_history: list | None = None):
+        """Stream tokens from the LLM one-by-one.
+
+        Yields individual text chunks as they are generated.
+        Handles tool calls internally (tool output is not streamed).
+        """
+        from geofix.chat.tools import get_state, ALL_TOOLS, consult_encyclopedia, get_audit_log
+
+        has_file = get_state("buildings_path") is not None
+
+        available = ALL_TOOLS if has_file else [consult_encyclopedia, get_audit_log]
         llm_with_tools = self.llm.bind_tools(available)
-        
+
         messages = [self.system_msg]
 
-        # Add chat history
         if chat_history:
             for msg in chat_history:
                 if msg["role"] == "user":
@@ -84,35 +106,53 @@ class GeoFixAgent:
                 else:
                     messages.append(AIMessage(content=msg["content"]))
 
-        # Dynamic System Instruction
         if not has_file:
-            messages.append(SystemMessage(content="IMPORTANT: No file is uploaded. You CANNOT use `profile_data` or `detect_errors`. If user greets you, just chat. Do NOT complain about missing files."))
+            messages.append(
+                SystemMessage(
+                    content="No file is uploaded. You cannot use data processing tools. "
+                    "Respond conversationally or use the encyclopedia for GIS terms."
+                )
+            )
 
         messages.append(HumanMessage(content=user_input))
+        messages = _trim_history(messages)
 
-        # Agentic loop — keep going until LLM stops calling tools
-        for _step in range(10):
-            response = llm_with_tools.invoke(messages)
-            messages.append(response)
+        for _step in range(MAX_AGENT_STEPS):
+            # Stream the response and collect it simultaneously
+            collected_chunks = []
+            full_response = None
 
-            # Check if there are tool calls
-            if not response.tool_calls:
-                return response.content or "Done."
+            for chunk in llm_with_tools.stream(messages):
+                collected_chunks.append(chunk)
+                if chunk.content:
+                    yield chunk.content
 
-            # Execute each tool call
-            from langchain_core.messages import ToolMessage
+            # Merge chunks into a single AIMessage to check for tool calls
+            if collected_chunks:
+                full_response = collected_chunks[0]
+                for c in collected_chunks[1:]:
+                    full_response = full_response + c
 
-            for tool_call in response.tool_calls:
+            if full_response is None:
+                return
+
+            messages.append(full_response)
+
+            # If no tool calls, we're done (content already streamed)
+            if not full_response.tool_calls:
+                return
+
+            # Execute tool calls and loop back for the next LLM response
+            for tool_call in full_response.tool_calls:
                 tool_name = tool_call["name"]
                 tool_args = tool_call["args"]
 
-                # Find and execute the tool
-                tool_fn = next(
-                    (t for t in available if t.name == tool_name), None
-                )
+                tool_fn = next((t for t in available if t.name == tool_name), None)
                 if tool_fn is None:
-                    # If LLM tries to call a hidden tool (hallucination), steer it back to chat
-                    result = "SYSTEM NOTE: The user has NOT uploaded a file yet. Do NOT use data tools. Just answer the user's question conversationally or use the encyclopedia."
+                    result = (
+                        "Tool unavailable. No file has been uploaded yet. "
+                        "Answer the user's question conversationally."
+                    )
                 else:
                     try:
                         result = tool_fn.invoke(tool_args)
@@ -122,20 +162,24 @@ class GeoFixAgent:
                 messages.append(
                     ToolMessage(content=str(result), tool_call_id=tool_call["id"])
                 )
-        
-        return response.content or "Reached maximum steps."
 
 
-def create_agent(config: GeoFixConfig = DEFAULT_CONFIG, model_name: str | None = None) -> GeoFixAgent:
+def create_agent(
+    config: GeoFixConfig = DEFAULT_CONFIG,
+    model_name: str | None = None,
+) -> GeoFixAgent:
     """Create a GeoFix agent instance with optional model override."""
     if model_name:
         from dataclasses import replace
+
         new_llm = replace(config.llm, model=model_name)
         config = replace(config, llm=new_llm)
 
     agent = GeoFixAgent(config)
     logger.info(
-        "GeoFix agent created with %d tools (provider=%s, model=%s)",
-        len(ALL_TOOLS), config.llm.provider, config.llm.model,
+        "Agent created: %d tools, provider=%s, model=%s",
+        len(ALL_TOOLS),
+        config.llm.provider,
+        config.llm.model,
     )
     return agent

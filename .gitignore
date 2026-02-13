@@ -9,6 +9,8 @@ dist/
 _geofix_temp/
 geofix_output/
 geofix_audit.db
+geofix_conversations.db
+move_doc.py
 doc/
 *.gpkg
 *.shp

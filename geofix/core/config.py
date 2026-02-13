@@ -1,4 +1,4 @@
-"""GeoFix configuration — extends OVC config with decision and LLM settings."""
+"""GeoFix configuration — extends OVC config with decision, LLM, cache, and router settings."""
 
 from __future__ import annotations
 
@@ -10,17 +10,17 @@ from pathlib import Path
 class DecisionThresholds:
     """Confidence thresholds for the three-tier decision system."""
 
-    auto_fix_min: float = 0.80        # Tier 1 — rule-based auto-fix
-    llm_fix_min: float = 0.60         # Tier 2 — LLM-recommended fix
-    human_review_below: float = 0.60  # Tier 3 — escalate to human
+    auto_fix_min: float = 0.80
+    llm_fix_min: float = 0.60
+    human_review_below: float = 0.60
 
 
 @dataclass(frozen=True)
 class LLMConfig:
     """LLM provider settings."""
 
-    provider: str = "ollama"            # "ollama" or "google"
-    model: str = "llama3.2"
+    provider: str = "ollama"
+    model: str = "llama3.1:latest"
     temperature: float = 0.1
     max_tokens: int = 2048
     fallback_model: str = "mistral"
@@ -41,14 +41,42 @@ class GeometryThresholds:
 
 
 @dataclass(frozen=True)
+class CacheConfig:
+    """Response cache settings."""
+
+    max_size: int = 256
+    ttl_seconds: int = 3600
+
+
+@dataclass(frozen=True)
+class ConversationConfig:
+    """Conversation persistence settings."""
+
+    db_path: Path = Path("geofix_conversations.db")
+    max_history_messages: int = 50
+
+
+@dataclass(frozen=True)
+class RouterConfig:
+    """Model router settings."""
+
+    auto_route: bool = True
+    simple_model: str = "llama3.2"
+    medium_model: str = "llama3.2"
+    complex_model: str = "llama3.1:latest"
+
+
+@dataclass(frozen=True)
 class GeoFixConfig:
     """Top-level GeoFix configuration."""
 
     decision: DecisionThresholds = field(default_factory=DecisionThresholds)
     llm: LLMConfig = field(default_factory=LLMConfig)
     geometry: GeometryThresholds = field(default_factory=GeometryThresholds)
+    cache: CacheConfig = field(default_factory=CacheConfig)
+    conversations: ConversationConfig = field(default_factory=ConversationConfig)
+    router: RouterConfig = field(default_factory=RouterConfig)
 
-    # Paths
     audit_db_path: Path = Path("geofix_audit.db")
     output_dir: Path = Path("geofix_output")
     temp_dir: Path = Path("_geofix_temp")

@@ -1,180 +1,138 @@
 /* ============================================================
-   GeoFix — Professional Dark Theme
-   Clean, flat, high-contrast dark mode (GitHub/VS Code style)
+   GeoFix 2.0 — Chatbot UI Dark Theme
+   Clean, minimal, pure black aesthetic
    ============================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Newsreader:ital,wght@0,400;0,500;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-/* ── Root Variables ──────────────────────────────────────────── */
+/* ── CSS Variables ──────────────────────────────────────────── */
 :root {
-  /* Neutral Dark Palette */
-  --gf-bg-primary: #0d1117;
-  /* Main background (GitHub Dim) */
-  --gf-bg-secondary: #161b22;
-  /* Sidebar/Cards */
-  --gf-bg-tertiary: #21262d;
-  /* Inputs/Elements */
-  --gf-bg-hover: #30363d;
+  /* Pure Dark Palette */
+  --gf-bg-primary: #000000;
+  --gf-bg-secondary: #0d0d0d;
+  --gf-bg-chat: #141414;
+  --gf-bg-sidebar: #000000;
+  --gf-bg-input: #1a1a1a;
+  --gf-bg-hover: #1f1f1f;
+  --gf-bg-active: #262626;
 
-  --gf-text-primary: #f0f6fc;
-  --gf-text-secondary: #8b949e;
-  --gf-text-muted: #6e7681;
+  --gf-text-primary: #e5e5e5;
+  --gf-text-secondary: #a3a3a3;
+  --gf-text-muted: #737373;
+  --gf-text-placeholder: #525252;
 
-  /* Subtle Accents (Blue/Purple) */
-  --gf-accent: #58a6ff;
-  /* GitHub Blue */
-  --gf-accent-hover: #79c0ff;
-  --gf-success: #2ea043;
-  --gf-warning: #d29922;
-  --gf-error: #f85149;
-  --gf-border: #30363d;
+  /* Accent */
+  --gf-accent: #ffffff;
+  --gf-accent-subtle: rgba(255, 255, 255, 0.08);
+  --gf-accent-blue: #3b82f6;
 
-  --gf-radius: 6px;
-  /* Tighter, more professional radius */
+  --gf-border: rgba(255, 255, 255, 0.08);
+  --gf-border-hover: rgba(255, 255, 255, 0.15);
+
   --gf-font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --gf-radius: 12px;
+  --gf-radius-sm: 8px;
+  --gf-radius-lg: 16px;
+  --gf-transition: 150ms ease;
 }
 
-/* ── Global ──────────────────────────────────────────────────── */
-body,
-html {
+/* ── Base Reset ─────────────────────────────────────────────── */
+body {
   font-family: var(--gf-font) !important;
-  background: var(--gf-bg-primary) !important;
+  background-color: var(--gf-bg-primary) !important;
   color: var(--gf-text-primary) !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* ── Overrides ───────────────────────────────────────────────── */
-
-/* Backgrounds */
-.MuiDrawer-paper,
-.MuiAppBar-root,
-.MuiPaper-root {
-  background-color: var(--gf-bg-primary) !important;
+/* ── Sidebar ────────────────────────────────────────────────── */
+.cl-sidebar,
+[class*="sidebar"],
+nav {
+  background-color: var(--gf-bg-sidebar) !important;
   border-right: 1px solid var(--gf-border) !important;
-  border-bottom: 1px solid var(--gf-border) !important;
-  box-shadow: none !important;
 }
 
-/* Sidebar items */
-.MuiListItemButton-root {
-  border-radius: var(--gf-radius) !important;
-  margin: 4px 8px !important;
+/* New Chat button */
+.cl-sidebar button[class*="new"],
+.cl-sidebar a[class*="new"] {
+  background: transparent !important;
+  border: 1px solid var(--gf-border) !important;
+  color: var(--gf-text-primary) !important;
+  border-radius: var(--gf-radius-sm) !important;
+  font-weight: 500 !important;
+  transition: all var(--gf-transition) !important;
+}
+
+.cl-sidebar button[class*="new"]:hover,
+.cl-sidebar a[class*="new"]:hover {
+  background: var(--gf-bg-hover) !important;
+  border-color: var(--gf-border-hover) !important;
+}
+
+/* Search input in sidebar */
+.cl-sidebar input {
+  background: var(--gf-bg-input) !important;
+  border: 1px solid var(--gf-border) !important;
+  color: var(--gf-text-primary) !important;
+  border-radius: var(--gf-radius-sm) !important;
+  font-family: var(--gf-font) !important;
+}
+
+.cl-sidebar input::placeholder {
+  color: var(--gf-text-placeholder) !important;
+}
+
+/* Chat history items */
+.cl-sidebar [class*="thread"],
+.cl-sidebar [class*="conversation"] {
   color: var(--gf-text-secondary) !important;
+  border-radius: var(--gf-radius-sm) !important;
+  transition: background var(--gf-transition) !important;
 }
 
-.MuiListItemButton-root:hover {
-  background-color: var(--gf-bg-tertiary) !important;
+.cl-sidebar [class*="thread"]:hover,
+.cl-sidebar [class*="conversation"]:hover {
+  background: var(--gf-bg-hover) !important;
   color: var(--gf-text-primary) !important;
 }
 
-.MuiListItemButton-root.Mui-selected {
-  background-color: rgba(56, 139, 253, 0.1) !important;
-  color: var(--gf-accent) !important;
-  border-left: 3px solid var(--gf-accent) !important;
+/* Sidebar icons */
+.cl-sidebar svg {
+  color: var(--gf-text-muted) !important;
 }
 
-/* ── Chat Messages ───────────────────────────────────────────── */
-
-/* User Message */
-.cl-message[data-author="user"] {
-  background-color: var(--gf-bg-tertiary) !important;
-  border: 1px solid var(--gf-border) !important;
-  border-radius: var(--gf-radius) !important;
-  padding: 12px 16px !important;
+.cl-sidebar svg:hover {
   color: var(--gf-text-primary) !important;
 }
 
-/* Assistant Message */
-.cl-message[data-author="GeoFix"] {
-  background-color: transparent !important;
-  /* Clean look */
-  padding: 12px 16px !important;
+/* ── Main Chat Area ─────────────────────────────────────────── */
+main,
+[class*="main"],
+.cl-chat-container {
+  background-color: var(--gf-bg-chat) !important;
 }
 
-/* ── Input Area ──────────────────────────────────────────────── */
-.MuiOutlinedInput-root {
-  background-color: var(--gf-bg-secondary) !important;
-  border-radius: var(--gf-radius) !important;
-  border: 1px solid var(--gf-border) !important;
-  box-shadow: none !important;
+/* ── Header ─────────────────────────────────────────────────── */
+header,
+[class*="header"] {
+  background-color: var(--gf-bg-chat) !important;
+  border-bottom: 1px solid var(--gf-border) !important;
 }
 
-.MuiOutlinedInput-root.Mui-focused {
-  border-color: var(--gf-accent) !important;
-  box-shadow: 0 0 0 2px rgba(88, 166, 255, 0.2) !important;
-}
-
-.MuiOutlinedInput-notchedOutline {
+/* ── Messages ───────────────────────────────────────────────── */
+.cl-message {
+  background: transparent !important;
   border: none !important;
+  padding: 16px 20px !important;
+  border-radius: 0 !important;
+  animation: fadeIn 0.3s ease-out;
 }
 
-/* Buttons */
-.MuiButton-contained {
-  background-color: #238636 !important;
-  /* GitHub Green */
-  color: white !important;
-  box-shadow: none !important;
-  font-weight: 600 !important;
-  text-transform: none !important;
-  border-radius: var(--gf-radius) !important;
-  border: 1px solid rgba(240, 246, 252, 0.1) !important;
-}
-
-.MuiButton-contained:hover {
-  background-color: #2ea043 !important;
-}
-
-/* ── Typography & Elements ───────────────────────────────────── */
-a {
-  color: var(--gf-accent) !important;
-  text-decoration: none;
-}
-
-a:hover {
-  text-decoration: underline;
-}
-
-code {
-  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace !important;
-  background-color: rgba(110, 118, 129, 0.4) !important;
-  border-radius: 4px !important;
-  padding: 0.2em 0.4em !important;
-  font-size: 85% !important;
-}
-
-/* Tables */
-.markdown-body table {
-  display: block;
-  width: 100%;
-  overflow: auto;
-  border-spacing: 0;
-  border-collapse: collapse;
-}
-
-.markdown-body table tr {
-  background-color: var(--gf-bg-primary) !important;
-  border-top: 1px solid var(--gf-border) !important;
-}
-
-.markdown-body table tr:nth-child(2n) {
-  background-color: var(--gf-bg-secondary) !important;
-}
-
-.markdown-body table th,
-.markdown-body table td {
-  padding: 6px 13px !important;
-  border: 1px solid var(--gf-border) !important;
-}
-
-/* Hide watermarks */
-[class*="watermark"] {
-  display: none !important;
-}
-
-/* ── Animations ──────────────────────────────────────────────── */
-@keyframes slideIn {
+@keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(4px);
   }
 
   to {
@@ -183,6 +141,294 @@ code {
   }
 }
 
-.cl-message {
-  animation: slideIn 0.3s ease-out forwards;
+/* User messages */
+.cl-message[class*="user"] {
+  background: transparent !important;
+}
+
+/* Assistant messages */
+.cl-message[class*="assistant"] {
+  background: transparent !important;
+}
+
+/* Message content */
+.cl-message-content {
+  color: var(--gf-text-primary) !important;
+  font-size: 15px !important;
+  line-height: 1.7 !important;
+  letter-spacing: -0.01em !important;
+}
+
+.cl-message-content p {
+  margin-bottom: 8px !important;
+}
+
+/* ── Avatar ──────────────────────────────────────────────────── */
+.cl-message-avatar img,
+.MuiAvatar-img {
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 8px !important;
+  object-fit: contain !important;
+  background: var(--gf-bg-secondary) !important;
+  border: 1px solid var(--gf-border) !important;
+}
+
+.MuiAvatar-root {
+  width: 36px !important;
+  height: 36px !important;
+}
+
+/* ── Input Area ─────────────────────────────────────────────── */
+.cl-input-container,
+[class*="composer"] {
+  background-color: var(--gf-bg-chat) !important;
+  border-top: none !important;
+  padding: 12px 20px 24px !important;
+}
+
+textarea,
+.cl-textarea,
+[class*="composer"] textarea {
+  background: var(--gf-bg-input) !important;
+  border: 1px solid var(--gf-border) !important;
+  border-radius: var(--gf-radius) !important;
+  color: var(--gf-text-primary) !important;
+  font-family: var(--gf-font) !important;
+  font-size: 15px !important;
+  padding: 14px 16px !important;
+  transition: border-color var(--gf-transition) !important;
+  resize: none !important;
+}
+
+textarea:focus,
+.cl-textarea:focus,
+[class*="composer"] textarea:focus {
+  border-color: var(--gf-border-hover) !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+textarea::placeholder,
+.cl-textarea::placeholder {
+  color: var(--gf-text-placeholder) !important;
+}
+
+/* Send button */
+.cl-send-button,
+button[class*="send"] {
+  background: var(--gf-text-primary) !important;
+  color: var(--gf-bg-primary) !important;
+  border: none !important;
+  border-radius: var(--gf-radius-sm) !important;
+  transition: opacity var(--gf-transition) !important;
+}
+
+.cl-send-button:hover,
+button[class*="send"]:hover {
+  opacity: 0.85 !important;
+}
+
+/* Attach button */
+button[class*="attach"],
+button[class*="upload"] {
+  color: var(--gf-text-muted) !important;
+  transition: color var(--gf-transition) !important;
+}
+
+button[class*="attach"]:hover,
+button[class*="upload"]:hover {
+  color: var(--gf-text-primary) !important;
+}
+
+/* ── Starter Buttons ────────────────────────────────────────── */
+.cl-starter,
+button[class*="starter"] {
+  background: var(--gf-bg-input) !important;
+  border: 1px solid var(--gf-border) !important;
+  color: var(--gf-text-secondary) !important;
+  border-radius: var(--gf-radius) !important;
+  font-family: var(--gf-font) !important;
+  font-size: 14px !important;
+  padding: 12px 16px !important;
+  transition: all var(--gf-transition) !important;
+}
+
+.cl-starter:hover,
+button[class*="starter"]:hover {
+  background: var(--gf-bg-hover) !important;
+  border-color: var(--gf-border-hover) !important;
+  color: var(--gf-text-primary) !important;
+}
+
+/* ── Code Blocks ────────────────────────────────────────────── */
+pre {
+  background: var(--gf-bg-primary) !important;
+  border: 1px solid var(--gf-border) !important;
+  border-radius: var(--gf-radius-sm) !important;
+  padding: 16px !important;
+  font-size: 13.5px !important;
+  overflow-x: auto !important;
+}
+
+code {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace !important;
+  font-size: 13.5px !important;
+}
+
+:not(pre)>code {
+  background: var(--gf-accent-subtle) !important;
+  color: var(--gf-text-primary) !important;
+  padding: 2px 6px !important;
+  border-radius: 4px !important;
+  font-size: 13px !important;
+}
+
+/* ── Tables ─────────────────────────────────────────────────── */
+table {
+  border-collapse: collapse !important;
+  width: 100% !important;
+  margin: 12px 0 !important;
+  font-size: 14px !important;
+}
+
+th {
+  background: var(--gf-bg-hover) !important;
+  color: var(--gf-text-primary) !important;
+  font-weight: 600 !important;
+  text-align: left !important;
+  padding: 10px 14px !important;
+  border-bottom: 1px solid var(--gf-border-hover) !important;
+}
+
+td {
+  padding: 8px 14px !important;
+  border-bottom: 1px solid var(--gf-border) !important;
+  color: var(--gf-text-secondary) !important;
+}
+
+tr:hover td {
+  background: var(--gf-accent-subtle) !important;
+}
+
+/* ── Links ──────────────────────────────────────────────────── */
+a {
+  color: var(--gf-accent-blue) !important;
+  text-decoration: none !important;
+}
+
+a:hover {
+  text-decoration: underline !important;
+}
+
+/* ── Scrollbar ──────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* ── Markdown in messages ───────────────────────────────────── */
+.cl-message-content h1,
+.cl-message-content h2,
+.cl-message-content h3 {
+  color: var(--gf-text-primary) !important;
+  font-weight: 600 !important;
+  margin-top: 16px !important;
+  margin-bottom: 8px !important;
+}
+
+.cl-message-content h2 {
+  font-size: 18px !important;
+  border-bottom: 1px solid var(--gf-border) !important;
+  padding-bottom: 6px !important;
+}
+
+.cl-message-content ul,
+.cl-message-content ol {
+  padding-left: 20px !important;
+  margin: 8px 0 !important;
+}
+
+.cl-message-content li {
+  margin-bottom: 4px !important;
+  color: var(--gf-text-secondary) !important;
+}
+
+.cl-message-content strong {
+  color: var(--gf-text-primary) !important;
+  font-weight: 600 !important;
+}
+
+.cl-message-content blockquote {
+  border-left: 3px solid var(--gf-border-hover) !important;
+  padding-left: 14px !important;
+  color: var(--gf-text-muted) !important;
+  margin: 12px 0 !important;
+}
+
+/* ── Settings Panel ─────────────────────────────────────────── */
+.MuiSelect-select,
+.MuiMenuItem-root {
+  font-family: var(--gf-font) !important;
+  color: var(--gf-text-primary) !important;
+}
+
+.MuiMenu-paper,
+.MuiPaper-root {
+  background: var(--gf-bg-secondary) !important;
+  border: 1px solid var(--gf-border) !important;
+  border-radius: var(--gf-radius-sm) !important;
+  color: var(--gf-text-primary) !important;
+}
+
+.MuiMenuItem-root:hover {
+  background-color: var(--gf-bg-hover) !important;
+}
+
+/* ── Welcome / Empty State ──────────────────────────────────── */
+[class*="welcome"],
+[class*="empty-state"] {
+  color: var(--gf-text-muted) !important;
+}
+
+/* ── Typing indicator ───────────────────────────────────────── */
+@keyframes typingPulse {
+
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+.cl-typing-indicator {
+  animation: typingPulse 1.5s ease-in-out infinite;
+}
+
+/* ── Responsive ─────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .cl-message {
+    padding: 10px 12px !important;
+  }
+
+  :root {
+    --gf-radius: 8px;
+    --gf-radius-sm: 6px;
+  }
 }

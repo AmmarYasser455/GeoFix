@@ -132,18 +132,45 @@ def show_errors(error_type: Optional[str] = None, limit: int = 20) -> str:
     if not errors:
         return "No errors in memory. Run `detect_errors` first."
 
+    total = len(errors)
+
     if error_type:
         errors = [e for e in errors if e.error_type == error_type]
 
     errors = errors[:limit]
 
-    lines = ["| # | Type | Severity | Features |"]
-    lines.append("|---|---|---|---|")
-    for i, e in enumerate(errors, 1):
-        feats = ", ".join(e.affected_features[:3])
-        lines.append(f"| {i} | {e.error_type} | {e.severity.value} | {feats} |")
+    _severity_badge = {
+        "critical": "🔴 Critical",
+        "high": "🟠 High",
+        "medium": "🟡 Medium",
+        "low": "🟢 Low",
+    }
 
-    lines.append(f"\nShowing {len(errors)} errors.")
+    _type_label = {
+        "building_overlap": "Building Overlap",
+        "duplicate_geometry": "Duplicate Geometry",
+        "invalid_geometry": "Invalid Geometry",
+        "building_on_road": "Building on Road",
+        "building_boundary_overlap": "Boundary Overlap",
+        "unreasonable_area": "Unreasonable Area",
+    }
+
+    lines = [f"## Detected Errors ({len(errors)} of {total})\n"]
+    lines.append("| No. | Error Type | Severity | Affected Features |")
+    lines.append("|:---:|:---|:---|:---|")
+
+    for i, e in enumerate(errors, 1):
+        etype = _type_label.get(e.error_type, e.error_type.replace("_", " ").title())
+        severity = _severity_badge.get(e.severity.value, e.severity.value)
+        feats = ", ".join(str(f) for f in e.affected_features[:3])
+        if len(e.affected_features) > 3:
+            feats += f" (+{len(e.affected_features) - 3} more)"
+        lines.append(f"| {i} | {etype} | {severity} | {feats} |")
+
+    if len(errors) < total:
+        lines.append(f"\n*Showing first {len(errors)} of {total} errors.*")
+
+    lines.append('\nSay **"fix all"** to apply automatic corrections, or **"explain fix 1"** for details on a specific error.')
     return "\n".join(lines)
 
 

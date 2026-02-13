@@ -9,9 +9,11 @@ from __future__ import annotations
 import logging
 import shutil
 import tempfile
+import time
 from pathlib import Path
 
 from dotenv import load_dotenv
+
 load_dotenv()
 
 import chainlit as cl
@@ -20,52 +22,82 @@ from geofix.chat.agent import create_agent
 from geofix.chat.prompts import WELCOME_MESSAGE
 from geofix.chat.tools import set_state
 from geofix.audit.logger import AuditLogger
+from geofix.core.cache import ResponseCache
+from geofix.chat.datalayer import GeoFixDataLayer
 from geofix.core.config import DEFAULT_CONFIG
+from geofix.core.router import select_model
+from geofix.storage.conversations import ConversationStore
 
 logger = logging.getLogger("geofix.chat.app")
+
+# Cache for responses to identical queries (simple in-memory)
+_response_cache = ResponseCache(
+    max_size=DEFAULT_CONFIG.cache.max_size,
+    ttl_seconds=DEFAULT_CONFIG.cache.ttl_seconds,
+)
+
+# Initialize conversation store
+# Initialize conversation store
+_conv_store = ConversationStore(DEFAULT_CONFIG.conversations.db_path)
+
+import chainlit.data as cl_data
+
+# Initialize data layer for Chainlit sidebar history
+# KEY FIX: Direct injection into chainlit.data module AND config to ensure persistence.
+_dl_instance = GeoFixDataLayer(_conv_store)
+
+# Method 1: Inject into data module (for immediate access)
+cl_data._data_layer = _dl_instance
+cl_data._data_layer_initialized = True
+
+# Method 2: Inject into config (for fallback if data module resets)
+from chainlit.config import config
+config.code.data_layer = lambda: _dl_instance
+
+logger.info("DEBUG: GeoFixDataLayer injected into chainlit.data and chainlit.config")
+# raise Exception("VERIFICATION: app.py is running!")
+
+# Legacy decorator (kept but likely ignored due to init order)
+@cl.data_layer
+def get_data_layer():
+    logger.info("DEBUG: get_data_layer called (via decorator)")
+    return _dl_instance
 
 
 @cl.set_starters
 async def set_starters():
     return [
-        cl.Starter(
-            label="Profile Data",
-            message="profile",
-            ),
-        cl.Starter(
-            label="Detect Errors",
-            message="detect errors",
-            ),
-        cl.Starter(
-            label="Fix All",
-            message="fix all",
-            ),
-        cl.Starter(
-            label="Download",
-            message="download",
-            ),
+        cl.Starter(label="Profile Data", message="profile"),
+        cl.Starter(label="Detect Errors", message="detect errors"),
+        cl.Starter(label="Fix All", message="fix all"),
+        cl.Starter(label="Download", message="download"),
     ]
 
 
 @cl.on_chat_start
 async def start():
-    """Initialise the agent, audit logger, and temp directory."""
+    """Initialise the agent, audit logger, conversation, and temp directory."""
     agent = create_agent()
     cl.user_session.set("agent", agent)
     cl.user_session.set("chat_history", [])
+    cl.user_session.set("user_model_override", None)
 
-    # Set up audit logger
+    # Audit logger
     audit = AuditLogger(DEFAULT_CONFIG.audit_db_path)
     cl.user_session.set("audit_logger", audit)
     set_state("audit_logger", audit)
 
-    # Settings
+    # Conversation tracking
+    conv_id = _conv_store.create_conversation()
+    cl.user_session.set("conversation_id", conv_id)
+
+    # Model selector
     settings = await cl.ChatSettings(
         [
             cl.input_widget.Select(
                 id="Model",
-                label="AI Model Strategy",
-                values=["Speed (Llama 3.2)", "Smart (Llama 3.1 8B)", "Genius (DeepSeek R1)"],
+                label="AI Model",
+                values=["Auto", "Speed (Llama 3.2)", "Smart (Llama 3.1)"],
                 initial_index=0,
             )
         ]
@@ -75,23 +107,55 @@ async def start():
     tmp = Path(tempfile.mkdtemp(prefix="geofix_"))
     cl.user_session.set("tmp_dir", tmp)
 
-    # await cl.Message(content=WELCOME_MESSAGE).send()
+
+@cl.on_chat_resume
+async def on_chat_resume(thread: cl_data.ThreadDict):
+    """Restore session when loading a past conversation."""
+    cl.user_session.set("conversation_id", thread["id"])
+
+    # Rebuild LLM history
+    history = []
+    for step in thread["steps"]:
+        if step["type"] == "user_message":
+            history.append({"role": "user", "content": step["output"]})
+        elif step["type"] == "assistant_message":
+            history.append({"role": "assistant", "content": step["output"]})
+
+    cl.user_session.set("chat_history", history)
+
+    # Re-initialize standard components
+    agent = create_agent()
+    cl.user_session.set("agent", agent)
+    cl.user_session.set("user_model_override", None)
+
+    audit = AuditLogger(DEFAULT_CONFIG.audit_db_path)
+    cl.user_session.set("audit_logger", audit)
+    set_state("audit_logger", audit)
+
+    tmp = Path(tempfile.mkdtemp(prefix="geofix_"))
+    cl.user_session.set("tmp_dir", tmp)
 
 
 @cl.on_settings_update
 async def setup_agent(settings):
     model_map = {
+        "Auto": None,
         "Speed (Llama 3.2)": "llama3.2",
-        "Smart (Llama 3.1 8B)": "llama3.1:8b",
-        "Genius (DeepSeek R1)": "deepseek-r1:14b",
+        "Smart (Llama 3.1)": "llama3.1:latest",
     }
     selected = settings["Model"]
-    model_name = model_map.get(selected, "llama3.2")
-    
-    # Re-create agent
-    agent = create_agent(model_name=model_name)
-    cl.user_session.set("agent", agent)
-    await cl.Message(content=f"🧠 **Brain Switched!** Now using: `{selected}`").send()
+    model_name = model_map.get(selected)
+
+    cl.user_session.set("user_model_override", model_name)
+
+    if model_name:
+        agent = create_agent(model_name=model_name)
+        cl.user_session.set("agent", agent)
+        await cl.Message(content=f"Model switched to **{selected}**").send()
+    else:
+        agent = create_agent()
+        cl.user_session.set("agent", agent)
+        await cl.Message(content="Model set to **Auto** — routing by query complexity.").send()
 
 
 @cl.on_message
@@ -99,78 +163,90 @@ async def on_message(message: cl.Message):
     """Handle incoming messages and file uploads."""
     agent = cl.user_session.get("agent")
     history = cl.user_session.get("chat_history", [])
+    conv_id = cl.user_session.get("conversation_id")
 
     # Handle file uploads
     if message.elements:
         await _handle_file_upload(message)
         return
 
-    user_text = message.content.strip().lower()
+    user_text = message.content.strip()
+    user_text_lower = user_text.lower()
+    start_time = time.time()
 
-    # ── Keyword routing (bypasses LLM → saves API quota) ──
-    direct_result = await _try_direct_command(user_text)
+    # Store user message
+    if conv_id:
+        _conv_store.add_message(conv_id, "user", user_text)
+
+    # Check response cache first
+    cached = _response_cache.get(user_text)
+    if cached is not None:
+        elapsed = time.time() - start_time
+        history.append({"role": "user", "content": user_text})
+        history.append({"role": "assistant", "content": cached})
+        cl.user_session.set("chat_history", history)
+        if conv_id:
+            _conv_store.add_message(conv_id, "assistant", cached, processing_time=elapsed)
+        await cl.Message(content=cached).send()
+        return
+
+    # Keyword routing (bypasses LLM)
+    direct_result = await _try_direct_command(user_text_lower)
     if direct_result is not None:
-        history.append({"role": "user", "content": message.content})
+        elapsed = time.time() - start_time
+        history.append({"role": "user", "content": user_text})
 
-        # Handle download — send file as Chainlit element
         if direct_result.startswith("DOWNLOAD_READY:"):
             file_path = direct_result.split(":", 1)[1]
             elements = [cl.File(name="building_qc.gpkg", path=file_path, display="inline")]
-            reply = "📥 **Your corrected dataset is ready!** Click the file below to download."
+            reply = "Your corrected dataset is ready. Click the file below to download."
             history.append({"role": "assistant", "content": reply})
             cl.user_session.set("chat_history", history)
             await cl.Message(content=reply, elements=elements).send()
         else:
+            _response_cache.put(user_text, direct_result)
             history.append({"role": "assistant", "content": direct_result})
             cl.user_session.set("chat_history", history)
+            if conv_id:
+                _conv_store.add_message(
+                    conv_id, "assistant", direct_result, processing_time=elapsed
+                )
             await cl.Message(content=direct_result).send()
         return
 
-    # ── LLM agent (with retry for rate limits) ──
-    import time
+    # Auto-route model if set to Auto
+    user_override = cl.user_session.get("user_model_override")
+    if not user_override:
+        routed_model = select_model(user_text, history_len=len(history))
+        agent = create_agent(model_name=routed_model)
 
+    # LLM agent with streaming (typing animation)
     msg = cl.Message(content="")
     await msg.send()
 
-    # Construct messages list for LangGraph
-    # We convert history dicts to format expected by the model/graph
-    messages = []
-    for h in history:
-        messages.append(h)
-    messages.append({"role": "user", "content": message.content})
-
     try:
-        # Stream events (v2) to get tokens as they are generated
-        async for event in agent.astream_events(
-            {"messages": messages},
-            version="v2"
-        ):
-            kind = event["event"]
-            
-            # Stream tokens from the model
-            if kind == "on_chat_model_stream":
-                chunk = event["data"]["chunk"]
-                if chunk.content:
-                    await msg.stream_token(chunk.content)
-            
-            # Optional: Log tool usage to UI (as steps) if needed
-            # But for now, just text streaming satisfies the "working in background" need
-            
+        for token in agent.stream(user_text, chat_history=history):
+            await msg.stream_token(token)
+
         await msg.update()
 
-        # Update history
-        history.append({"role": "user", "content": message.content})
+        elapsed = time.time() - start_time
+        history.append({"role": "user", "content": user_text})
         history.append({"role": "assistant", "content": msg.content})
         cl.user_session.set("chat_history", history)
-        return
+
+        # Cache the response for future identical queries
+        _response_cache.put(user_text, msg.content)
+
+        if conv_id:
+            _conv_store.add_message(
+                conv_id, "assistant", msg.content, processing_time=elapsed
+            )
 
     except Exception as exc:
-        err_str = str(exc)
         logger.error("Agent error: %s", exc)
-        await cl.Message(
-            content=f"❌ An error occurred: {exc}\n\nPlease try again."
-        ).send()
-        return
+        await msg.remove()
+        await cl.Message(content=f"An error occurred: {exc}\n\nPlease try again.").send()
 
 
 async def _try_direct_command(text: str) -> str | None:
@@ -179,55 +255,57 @@ async def _try_direct_command(text: str) -> str | None:
     Returns tool output string, or None if not a recognised command.
     """
     from geofix.chat.tools import (
-        detect_errors, show_errors, fix_all_auto,
-        get_audit_log, profile_data, download_fixed, _state,
+        detect_errors,
+        show_errors,
+        fix_all_auto,
+        get_audit_log,
+        profile_data,
+        download_fixed,
         consult_encyclopedia,
     )
 
-    # Normalise: replace underscores with spaces for matching
     norm = text.replace("_", " ").replace("?", "").strip()
 
-    # ── Greeting Bypass (Prevent Hallucinations) ──
-    # Llama 3.2 tends to hallucinate "file errors" on greetings.
-    # We intercept common greetings and return a static response.
-    # Match any message that STARTS with a greeting
+    # Greetings
     greetings = ["hello", "hi", "hey", "sup", "greetings", "yo", "test", "start"]
     if any(norm.startswith(g) for g in greetings):
         return (
-            "👋 **Hello!** I am GeoFix.\n\n"
+            "Hello! I am **GeoFix**, your geospatial data correction assistant.\n\n"
             "I can help you:\n"
-            "- **Fix Data**: Upload a file (SHP/GeoJSON/GPKG) 📎.\n"
-            "- **Explain Concepts**: Ask about \"topology\" or \"OVC logic\".\n"
-            "- **Chat**: Ask me anything!"
+            "- **Fix Data** — upload a file (SHP / GeoJSON / GPKG)\n"
+            "- **Explain Concepts** — ask about topology, OVC logic, or any GIS topic\n"
+            "- **Chat** — ask me anything"
         )
 
-    # logic / how it works
-    # Match various phrasings: "how you work", "how you works", "your logic", "how do you work"
-    logic_keywords = ["how you work", "how do you work", "logic", "pipeline", "explain logic", "how it works", "how you works", "how do you check", "your process"]
+    # Logic / how it works
+    logic_keywords = [
+        "how you work", "how do you work", "logic", "pipeline",
+        "explain logic", "how it works", "how do you check", "your process",
+    ]
     if any(kw in norm for kw in logic_keywords):
         return consult_encyclopedia.invoke({"term": "logic"})
 
-    # detect errors
+    # Detect errors
     if any(kw in norm for kw in ["detect error", "find error", "run qc", "check error", "run check"]):
         return detect_errors.invoke({})
 
-    # show errors
+    # Show errors
     if any(kw in norm for kw in ["show error", "list error", "what error"]):
         return show_errors.invoke({})
 
-    # fix all
+    # Fix all
     if any(kw in norm for kw in ["fix all", "fix everything", "auto fix", "autofix"]):
         return fix_all_auto.invoke({})
 
-    # audit log
+    # Audit log
     if any(kw in norm for kw in ["audit", "get audit", "log", "history"]):
         return get_audit_log.invoke({})
 
-    # profile
+    # Profile
     if any(kw in norm for kw in ["profile", "quality score", "data quality"]):
         return profile_data.invoke({})
 
-    # download
+    # Download
     if any(kw in norm for kw in ["download", "export", "save fixed", "get fixed"]):
         return download_fixed.invoke({})
 
@@ -244,20 +322,16 @@ async def _handle_file_upload(message: cl.Message):
             dest = tmp_dir / element.name
             shutil.copy2(element.path, dest)
             uploaded_paths.append(dest)
-            await cl.Message(
-                content=f"📁 Received: **{element.name}**"
-            ).send()
+            await cl.Message(content=f"Received: **{element.name}**").send()
 
     if not uploaded_paths:
         await cl.Message(content="No valid files detected.").send()
         return
 
-    # Store the primary file path
     primary = uploaded_paths[0]
     set_state("buildings_path", str(primary))
 
-    # Auto-profile
-    await cl.Message(content="🔍 Profiling your data...").send()
+    await cl.Message(content="Profiling your data...").send()
 
     from geofix.integration.geoqa_bridge import GeoQABridge
 
@@ -267,8 +341,8 @@ async def _handle_file_upload(message: cl.Message):
 
     lines = [
         f"## Dataset: {summary.name}\n",
-        f"| Metric | Value |",
-        f"|---|---|",
+        "| Metric | Value |",
+        "|---|---|",
         f"| Features | {summary.feature_count} |",
         f"| Geometry | {summary.geometry_type} |",
         f"| CRS | {summary.crs} |",
@@ -277,19 +351,15 @@ async def _handle_file_upload(message: cl.Message):
     ]
 
     if summary.warnings:
-        lines.append(f"\n⚠️ **Warnings:** " + "; ".join(summary.warnings))
+        lines.append("\n**Warnings:** " + "; ".join(summary.warnings))
     if summary.blockers:
-        lines.append(f"\n🚫 **Blockers:** " + "; ".join(summary.blockers))
+        lines.append("\n**Blockers:** " + "; ".join(summary.blockers))
 
     if summary.is_ready:
-        lines.append(
-            "\n✅ Data looks good! "
-            'Say **"detect errors"** to run the full QC pipeline.'
-        )
+        lines.append('\nData looks good. Say **"detect errors"** to run the full QC pipeline.')
     else:
         lines.append(
-            "\n❌ Data has quality blockers. "
-            "Please fix the issues above and re-upload."
+            "\nData has quality blockers. Please fix the issues above and re-upload."
         )
 
     await cl.Message(content="\n".join(lines)).send()
@@ -308,7 +378,7 @@ async def end():
 
 
 def main():
-    """CLI entry point — used by 'geofix' console script."""
+    """CLI entry point."""
     from chainlit.cli import run_chainlit
 
     run_chainlit(__file__)

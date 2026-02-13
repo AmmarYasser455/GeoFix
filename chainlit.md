@@ -1,14 +1,24 @@
-# Welcome to Chainlit! 🚀🤖
+# GeoFix
 
-Hi there, Developer! 👋 We're excited to have you on board. Chainlit is a powerful tool designed to help you prototype, debug and share applications built on top of LLMs.
+**Intelligent geospatial data correction powered by AI.**
 
-## Useful Links 🔗
+GeoFix detects and fixes spatial errors in your datasets — overlaps, boundary violations, road conflicts, invalid geometries, and more.
 
-- **Documentation:** Get started with our comprehensive [Chainlit Documentation](https://docs.chainlit.io) 📚
-- **Discord Community:** Join our friendly [Chainlit Discord](https://discord.gg/k73SQ3FyUh) to ask questions, share your projects, and connect with other developers! 💬
+### Getting Started
 
-We can't wait to see what you create with Chainlit! Happy coding! 💻😊
+1. **Upload** a geospatial file (Shapefile, GeoJSON, or GeoPackage)
+2. **Profile** your data quality with automatic analysis
+3. **Detect** errors using the built-in QC pipeline
+4. **Fix** issues automatically with audited decision-making
+5. **Export** your corrected dataset
 
-## Welcome screen
+### Quick Commands
 
-To modify the welcome screen, edit the `chainlit.md` file at the root of your project. If you do not want a welcome screen, just leave this file empty.
+| Command | Description |
+|---|---|
+| `profile` | Analyze data quality |
+| `detect errors` | Run the full QC pipeline |
+| `fix all` | Apply automatic corrections |
+| `download` | Export the corrected dataset |
+
+Or just ask me anything — I can help with GIS concepts, coding, and more.
