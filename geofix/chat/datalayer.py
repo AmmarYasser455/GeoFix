@@ -1,12 +1,13 @@
 import json
-import logging
-from typing import Optional, List, Dict, Any
+from typing import Any, Dict, List, Optional
+
 import chainlit.data as cl_data
-from chainlit.types import ThreadDict, PaginatedResponse, Pagination, ThreadFilter
-from chainlit.step import StepDict
 from chainlit.element import ElementDict
+from chainlit.step import StepDict
+from chainlit.types import PaginatedResponse, Pagination, ThreadDict, ThreadFilter
+
 from geofix.storage.conversations import ConversationStore
-from datetime import datetime
+
 
 class GeoFixDataLayer(cl_data.BaseDataLayer):
     def __init__(self, store: ConversationStore):
@@ -25,7 +26,7 @@ class GeoFixDataLayer(cl_data.BaseDataLayer):
         limit = pagination.first or 20
         # Simple pagination relying on limit for now. Real cursor/offset requires schema change or advanced query
         conversations = self.store.list_conversations(limit=limit)
-        
+
         threads: List[ThreadDict] = []
         for conv in conversations:
             threads.append({
@@ -39,7 +40,7 @@ class GeoFixDataLayer(cl_data.BaseDataLayer):
                 "steps": [],
                 "elements": [],
             })
-            
+
         return PaginatedResponse(
             data=threads,
             pageInfo={"hasNextPage": False, "endCursor": None}
@@ -51,10 +52,10 @@ class GeoFixDataLayer(cl_data.BaseDataLayer):
         conv = self.store.conn.execute("SELECT * FROM conversations WHERE id = ?", (thread_id,)).fetchone()
         if not conv:
             return None
-        
+
         conv_dict = dict(conv)
         messages = self.store.get_messages(thread_id)
-        
+
         steps: List[StepDict] = []
         for msg in messages:
             steps.append({

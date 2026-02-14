@@ -6,12 +6,12 @@ from pathlib import Path
 import pytest
 
 try:
-    from shapely.geometry import Polygon, box
+    from shapely.geometry import box
     HAS_SHAPELY = True
 except ImportError:
     HAS_SHAPELY = False
 
-from geofix.core.config import GeoFixConfig, DEFAULT_CONFIG
+from geofix.core.config import DEFAULT_CONFIG
 
 
 @pytest.fixture

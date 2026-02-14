@@ -52,7 +52,7 @@ def analyze(file_path: str, auto_fix: bool, output: str | None, report: str | No
         click.echo(f"\n💾 Saved to {output}")
 
     if report:
-        click.echo(f"📄 Report generated")
+        click.echo("📄 Report generated")
 
 
 @cli.command()

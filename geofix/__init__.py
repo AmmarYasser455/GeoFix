@@ -13,6 +13,6 @@ One-liner API::
 __version__ = "2.1.0"
 __author__ = "Ammar Yasser Abdalazim"
 
-from geofix.api import analyze, validate, fix, AnalysisResult
+from geofix.api import AnalysisResult, analyze, fix, validate
 
 __all__ = ["analyze", "validate", "fix", "AnalysisResult", "__version__"]

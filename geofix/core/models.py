@@ -13,7 +13,6 @@ from typing import Any, Optional
 
 from shapely.geometry.base import BaseGeometry
 
-
 # ── Enums ───────────────────────────────────────────────────────────────
 
 

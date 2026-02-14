@@ -1,11 +1,11 @@
 """Tests for the one-liner API (geofix.analyze, geofix.validate, geofix.fix)."""
 
-import pytest
-import geopandas as gpd
-from pathlib import Path
-from shapely.geometry import Polygon, Point
 
-from geofix.api import analyze, validate, fix, AnalysisResult
+import geopandas as gpd
+import pytest
+from shapely.geometry import Polygon
+
+from geofix.api import AnalysisResult, analyze, fix, validate
 
 
 @pytest.fixture

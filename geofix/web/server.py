@@ -10,27 +10,23 @@ from __future__ import annotations
 
 import json
 import logging
-import shutil
 import tempfile
 import time
-import uuid
 from pathlib import Path
-from typing import Optional
 
 from dotenv import load_dotenv
 
 load_dotenv()
 
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, UploadFile, File, HTTPException, Request
-from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
+from fastapi import FastAPI, File, Request, UploadFile, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from geofix.chat.agent import create_agent, GeoFixAgent
-from geofix.chat.prompts import WELCOME_MESSAGE
-from geofix.chat.tools import set_state, get_state
 from geofix.audit.logger import AuditLogger
+from geofix.chat.agent import create_agent
+from geofix.chat.tools import set_state
 from geofix.core.cache import ResponseCache
 from geofix.core.config import DEFAULT_CONFIG
 from geofix.core.router import select_model
@@ -293,13 +289,13 @@ async def websocket_chat(ws: WebSocket):
 def _try_direct_command(text: str) -> str | None:
     """Route common commands directly to tools without LLM."""
     from geofix.chat.tools import (
+        consult_encyclopedia,
         detect_errors,
-        show_errors,
+        download_fixed,
         fix_all_auto,
         get_audit_log,
         profile_data,
-        download_fixed,
-        consult_encyclopedia,
+        show_errors,
     )
 
     norm = text.replace("_", " ").replace("?", "").strip()

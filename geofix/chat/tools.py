@@ -42,7 +42,7 @@ def profile_data() -> str:
     path = Path(file_path)
     if not path.exists():
         return "⚠️ File not found. Please upload a geospatial file first."
-        
+
     bridge = GeoQABridge()
     summary = bridge.profile(path)
     set_state("last_profile", summary)
@@ -56,9 +56,9 @@ def profile_data() -> str:
         f"**Valid geometries:** {summary.valid_pct:.1f}%",
     ]
     if summary.warnings:
-        lines.append(f"\n**Warnings:** " + "; ".join(summary.warnings))
+        lines.append("\n**Warnings:** " + "; ".join(summary.warnings))
     if summary.blockers:
-        lines.append(f"\n**⚠️ Blockers:** " + "; ".join(summary.blockers))
+        lines.append("\n**⚠️ Blockers:** " + "; ".join(summary.blockers))
     if summary.is_ready:
         lines.append("\n✅ Data is ready for error detection.")
     else:
@@ -87,7 +87,7 @@ def detect_errors() -> str:
     boundary_path = get_state("boundary_path")
 
     from geofix.integration.ovc_bridge import OVCBridge
-    
+
     bridge = OVCBridge()
     errors, outputs = bridge.detect_errors(
         buildings_path=Path(buildings_path),
@@ -111,8 +111,8 @@ def detect_errors() -> str:
         lines.append(f"| {etype} | {count} |")
 
     lines.append(
-        f"\nUse `fix_all_auto` to auto-fix high-confidence errors, "
-        f"or `show_errors` to see details."
+        "\nUse `fix_all_auto` to auto-fix high-confidence errors, "
+        "or `show_errors` to see details."
     )
     return "\n".join(lines)
 
@@ -185,9 +185,9 @@ def fix_all_auto() -> str:
     if not errors:
         return "No errors to fix. Run `detect_errors` first."
 
+    from geofix.core.models import FixTier
     from geofix.decision.engine import DecisionEngine
     from geofix.fixes.registry import build_default_registry
-    from geofix.core.models import FixTier
 
     engine = DecisionEngine()
     registry = build_default_registry()
@@ -247,12 +247,12 @@ def fix_all_auto() -> str:
     ovc_outputs = get_state("ovc_outputs")
     if ovc_outputs and ovc_outputs.gpkg_path.exists():
         try:
+
             import geopandas as gpd
             import pandas as pd
-            from pathlib import Path
 
             gpkg_path = ovc_outputs.gpkg_path
-            
+
             # 1. Load clean buildings
             try:
                 clean_gdf = gpd.read_file(gpkg_path, layer="buildings_clean")
@@ -261,11 +261,11 @@ def fix_all_auto() -> str:
 
             # 2. Reconstruct fixed/unfixed errors
             fixed_rows = []
-            
+
             for error in errors:
                 # Use fixed geometry if available, else original
                 geom = fixed_results.get(error.error_id, error.geometry)
-                
+
                 # Check for deletion (None geometry)
                 if geom is None or geom.is_empty:
                     continue
@@ -274,7 +274,7 @@ def fix_all_auto() -> str:
                 props = error.properties.copy()
                 props["geometry"] = geom
                 props["fixed_status"] = "fixed" if error.error_id in fixed_results else "unfixed"
-                
+
                 # Restore ID columns if missing
                 if "bldg_id" not in props and error.affected_features:
                      props["bldg_id"] = error.affected_features[0]
@@ -284,7 +284,7 @@ def fix_all_auto() -> str:
             # 3. Create DataFrame from fixed data
             if fixed_rows:
                 fixed_gdf = gpd.GeoDataFrame(fixed_rows, crs=clean_gdf.crs if not clean_gdf.empty else "EPSG:4326")
-                
+
                 # Align columns
                 common_cols = list(set(clean_gdf.columns) & set(fixed_gdf.columns))
                 if not clean_gdf.empty:
@@ -298,34 +298,34 @@ def fix_all_auto() -> str:
             # We save as a NEW file to update the state properly
             out_dir = gpkg_path.parent
             fixed_path = out_dir / "buildings_fixed.gpkg"
-            
+
             # Ensure it's a valid GeoDataFrame
             if not isinstance(final_gdf, gpd.GeoDataFrame):
                  final_gdf = gpd.GeoDataFrame(final_gdf, geometry="geometry")
 
             final_gdf.to_file(fixed_path, layer="buildings_fixed", driver="GPKG")
-            
+
             # Update state so download_fixed() picks this up
             # We construct a new PipelineOutputs object or just monkey-patch the path?
             # PipelineOutputs is frozen. We must update the state directly.
             # But get_state returns a copy? Objects are ref?
             # We can't modify fixed dataclass.
             # We'll invoke set_state with a modified object if possible, or just hack "download_path"
-            
+
             # Actually, `download_fixed` checks `ovc_outputs.gpkg_path`.
             # We can't change `ovc_outputs.gpkg_path` easily without re-creating the object.
             # AND `download_fixed` prefers `get_state("download_path")` if set?
             # Let's check download_fixed code...
-            
+
             # Lines 257-259:
             # gpkg_path = ovc_outputs.gpkg_path
             # if gpkg_path... set_state("download_path", str(gpkg_path))
-            
+
             # Use a state override!
             set_state("download_path", str(fixed_path))
-            
+
             lines.append(f"\n💾 **Saved:** Corrected data saved to `{fixed_path.name}`")
-            
+
         except Exception as e:
             logger.error("Failed to save fixed data: %s", e)
             lines.append(f"\n⚠️ Failed to save fixed data: {e}")
@@ -430,37 +430,37 @@ def consult_encyclopedia(term: str) -> str:
         Definition and relevant info.
     """
     import json
-    
+
     # Locate json in geofix/knowledge/gis_encyclopedia.json
     # tools.py is in geofix/chat/, so we go up one level
     base_dir = Path(__file__).resolve().parent.parent
     encyclopedia_path = base_dir / "knowledge" / "gis_encyclopedia.json"
-    
+
     if not encyclopedia_path.exists():
         return "Encyclopedia database not found."
-        
+
     try:
         with open(encyclopedia_path, "r", encoding="utf-8") as f:
             data = json.load(f)
-            
+
         term_lower = term.lower().strip()
         results = []
-        
+
         # Search match in keys or values
         for section, items in data.items():
             for key, value in items.items():
-                if term_lower in key.lower() or term_lower in value.lower(): 
+                if term_lower in key.lower() or term_lower in value.lower():
                    # Priority match: exact key
                    prefix = "⭐ " if term_lower == key.lower() else ""
                    results.append(f"{prefix}**{key.replace('_', ' ').title()}** ({section}):\n{value}")
 
         if not results:
              return f"No exact entry found for '{term}'. Try simpler keywords."
-             
+
         # Sort to put exact matches first
         results.sort(key=lambda x: "⭐" not in x)
         return "\n\n".join(results[:3])
-        
+
     except Exception as e:
         return f"Error reading encyclopedia: {e}"
 

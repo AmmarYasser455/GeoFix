@@ -1,15 +1,15 @@
 """Unit tests for configuration dataclasses."""
 
-import pytest
 from dataclasses import FrozenInstanceError
 from pathlib import Path
 
+import pytest
+
 from geofix.core.config import (
+    DEFAULT_CONFIG,
     CacheConfig,
     ConversationConfig,
     DecisionThresholds,
-    DEFAULT_CONFIG,
-    GeoFixConfig,
     GeometryThresholds,
     LLMConfig,
     RouterConfig,

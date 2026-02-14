@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
+from shapely.geometry import MultiPolygon
 from shapely.geometry.base import BaseGeometry
-from shapely.geometry import Polygon, MultiPolygon
-from shapely.ops import snap, unary_union, nearest_points
+from shapely.ops import snap, unary_union
 
 from geofix.fixes.base import FixOperation
 

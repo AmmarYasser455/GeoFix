@@ -13,7 +13,7 @@ from typing import Optional
 
 import geopandas as gpd
 
-from geofix.core.config import GeoFixConfig, DEFAULT_CONFIG
+from geofix.core.config import DEFAULT_CONFIG, GeoFixConfig
 from geofix.core.exceptions import DataLoadError
 from geofix.core.models import DetectedError, ErrorSeverity
 
@@ -72,8 +72,8 @@ class OVCBridge:
         (errors, pipeline_outputs)
             A list of ``DetectedError`` and the raw OVC ``PipelineOutputs``.
         """
-        from ovc.export.pipeline import run_pipeline
         from ovc.core.config import Config as OVCConfig
+        from ovc.export.pipeline import run_pipeline
 
         out_dir = out_dir or self.config.temp_dir / "ovc_run"
         out_dir.mkdir(parents=True, exist_ok=True)

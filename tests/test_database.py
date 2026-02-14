@@ -1,7 +1,7 @@
 """Unit tests for the audit database."""
 
+
 import pytest
-from pathlib import Path
 
 from geofix.audit.database import AuditDatabase
 

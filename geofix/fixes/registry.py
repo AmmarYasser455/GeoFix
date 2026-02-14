@@ -47,9 +47,9 @@ class FixRegistry:
 
 def build_default_registry() -> FixRegistry:
     """Create a registry pre-loaded with all built-in fix operations."""
-    from geofix.fixes.geometry import MakeValidFix, SimplifyFix
-    from geofix.fixes.overlap import DeleteFix, TrimFix, MergeFix, SnapFix
     from geofix.fixes.boundary import ClipFix
+    from geofix.fixes.geometry import MakeValidFix, SimplifyFix
+    from geofix.fixes.overlap import DeleteFix, MergeFix, SnapFix, TrimFix
     from geofix.fixes.road import NudgeFix
 
     registry = FixRegistry()

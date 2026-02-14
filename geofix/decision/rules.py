@@ -21,9 +21,9 @@ from geofix.core.models import (
 )
 from geofix.decision.confidence import (
     accuracy_difference,
+    combined_confidence,
     confidence_from_accuracy_gap,
     confidence_from_overlap_ratio,
-    combined_confidence,
 )
 
 logger = logging.getLogger("geofix.decision.rules")
@@ -331,7 +331,7 @@ def rule_overlap_by_class(
             tier=FixTier.RULE_BASED,
             confidence=0.80,
             parameters={"delete_feature": error.affected_features[0] if error.affected_features else "unknown"},
-            reasoning=f"Duplicate building (OVC class=duplicate) — flagged for deletion.",
+            reasoning="Duplicate building (OVC class=duplicate) — flagged for deletion.",
         )
     elif error_class == "sliver":
         return FixStrategy(

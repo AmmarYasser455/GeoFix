@@ -7,13 +7,12 @@ Supports per-invocation model switching and context window management.
 from __future__ import annotations
 
 import logging
-import os
 
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage, ToolMessage
 
 from geofix.chat.prompts import SYSTEM_PROMPT
 from geofix.chat.tools import ALL_TOOLS
-from geofix.core.config import GeoFixConfig, DEFAULT_CONFIG
+from geofix.core.config import DEFAULT_CONFIG, GeoFixConfig
 
 logger = logging.getLogger("geofix.chat.agent")
 
@@ -103,7 +102,7 @@ class GeoFixAgent:
         Yields individual text chunks as they are generated.
         Handles tool calls internally (tool output is not streamed).
         """
-        from geofix.chat.tools import get_state, ALL_TOOLS, consult_encyclopedia, get_audit_log
+        from geofix.chat.tools import ALL_TOOLS, consult_encyclopedia, get_audit_log, get_state
 
         has_file = get_state("buildings_path") is not None
 

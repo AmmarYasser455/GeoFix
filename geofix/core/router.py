@@ -74,7 +74,7 @@ def select_model(
         return user_override
 
     complexity = classify_complexity(query, history_len)
-    
+
     if complexity == Complexity.SIMPLE:
         model = DEFAULT_CONFIG.router.simple_model
     elif complexity == Complexity.MEDIUM:

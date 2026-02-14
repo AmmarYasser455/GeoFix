@@ -11,15 +11,15 @@ from __future__ import annotations
 import logging
 from typing import Optional
 
-from geofix.core.config import GeoFixConfig, DEFAULT_CONFIG
+from geofix.core.config import DEFAULT_CONFIG, GeoFixConfig
 from geofix.core.models import (
     DetectedError,
     FeatureMetadata,
     FixStrategy,
     FixTier,
 )
-from geofix.decision.rules import RuleSet, build_default_ruleset
 from geofix.decision.llm_reasoner import LLMReasoner
+from geofix.decision.rules import RuleSet, build_default_ruleset
 
 logger = logging.getLogger("geofix.decision.engine")
 

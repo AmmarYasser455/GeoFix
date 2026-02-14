@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from shapely.geometry.base import BaseGeometry
 from shapely.geometry import MultiPolygon
+from shapely.geometry.base import BaseGeometry
 
 from geofix.fixes.base import FixOperation
 

@@ -1,6 +1,5 @@
 """Unit tests for the three-tier decision engine."""
 
-from unittest.mock import MagicMock, patch
 
 import pytest
 from shapely.geometry import box

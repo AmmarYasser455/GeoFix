@@ -1,11 +1,10 @@
 """Unit tests for core data models."""
 
-from datetime import datetime, timezone
+from datetime import datetime
 
 from shapely.geometry import box
 
 from geofix.core.models import (
-    AuditEntry,
     DetectedError,
     ErrorSeverity,
     FeatureMetadata,

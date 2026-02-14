@@ -120,7 +120,7 @@ class LLMReasoner:
 
         try:
             llm = self._get_llm()
-            from langchain_core.messages import SystemMessage, HumanMessage
+            from langchain_core.messages import HumanMessage, SystemMessage
 
             response = llm.invoke([
                 SystemMessage(content=SYSTEM_PROMPT),
@@ -160,7 +160,7 @@ class LLMReasoner:
             )
 
         if context:
-            parts.append(f"\n## Rule Engine Attempt")
+            parts.append("\n## Rule Engine Attempt")
             parts.append(f"- Suggested: {context.fix_type}")
             parts.append(f"- Confidence: {context.confidence:.2f}")
             parts.append(f"- Reasoning: {context.reasoning}")

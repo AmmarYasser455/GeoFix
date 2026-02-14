@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from geofix.core.models import DetectedError, FeatureMetadata
+from geofix.core.models import FeatureMetadata
 
 
 def accuracy_difference(

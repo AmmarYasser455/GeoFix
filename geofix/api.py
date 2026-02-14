@@ -38,7 +38,7 @@ class AnalysisResult(dict):
     def summary(self) -> str:
         """Return a human-readable summary string."""
         lines = [
-            f"📊 GeoFix Analysis Results",
+            "📊 GeoFix Analysis Results",
             f"   Features:      {self.get('feature_count', '?')}",
             f"   Geometry type:  {self.get('geometry_type', '?')}",
             f"   CRS:            {self.get('crs', '?')}",

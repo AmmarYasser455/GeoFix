@@ -1,6 +1,5 @@
 """Unit tests for the rule-based decision system."""
 
-import pytest
 from shapely.geometry import box
 
 from geofix.core.models import (

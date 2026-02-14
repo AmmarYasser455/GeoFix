@@ -14,16 +14,15 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv()  # noqa: E402
 
 import chainlit as cl
 
-from geofix.chat.agent import create_agent
-from geofix.chat.prompts import WELCOME_MESSAGE
-from geofix.chat.tools import set_state
 from geofix.audit.logger import AuditLogger
-from geofix.core.cache import ResponseCache
+from geofix.chat.agent import create_agent
 from geofix.chat.datalayer import GeoFixDataLayer
+from geofix.chat.tools import set_state
+from geofix.core.cache import ResponseCache
 from geofix.core.config import DEFAULT_CONFIG
 from geofix.core.router import select_model
 from geofix.storage.conversations import ConversationStore
@@ -52,6 +51,7 @@ cl_data._data_layer_initialized = True
 
 # Method 2: Inject into config (for fallback if data module resets)
 from chainlit.config import config
+
 config.code.data_layer = lambda: _dl_instance
 
 logger.info("DEBUG: GeoFixDataLayer injected into chainlit.data and chainlit.config")
@@ -303,13 +303,13 @@ async def _try_direct_command(text: str) -> str | None:
     Returns tool output string, or None if not a recognised command.
     """
     from geofix.chat.tools import (
+        consult_encyclopedia,
         detect_errors,
-        show_errors,
+        download_fixed,
         fix_all_auto,
         get_audit_log,
         profile_data,
-        download_fixed,
-        consult_encyclopedia,
+        show_errors,
     )
 
     norm = text.replace("_", " ").replace("?", "").strip()

@@ -3,7 +3,6 @@
 import json
 
 import pytest
-from pathlib import Path
 
 from geofix.storage.conversations import ConversationStore
 
