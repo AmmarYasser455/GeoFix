@@ -60,7 +60,7 @@ class TestCacheConfig:
 class TestConversationConfig:
     def test_defaults(self):
         c = ConversationConfig()
-        assert c.db_path == Path("geofix_conversations.db")
+        assert c.db_path == Path("data/geofix_conversations.db")
         assert c.max_history_messages == 50
 
 
@@ -80,7 +80,7 @@ class TestGeoFixConfig:
         assert isinstance(c.cache, CacheConfig)
         assert isinstance(c.conversations, ConversationConfig)
         assert isinstance(c.router, RouterConfig)
-        assert c.audit_db_path == Path("geofix_audit.db")
+        assert c.audit_db_path == Path("data/geofix_audit.db")
 
     def test_frozen(self):
         with pytest.raises(FrozenInstanceError):

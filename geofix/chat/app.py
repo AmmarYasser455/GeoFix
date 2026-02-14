@@ -67,20 +67,67 @@ def get_data_layer():
 @cl.set_starters
 async def set_starters():
     return [
-        cl.Starter(label="Profile Data", message="profile"),
-        cl.Starter(label="Detect Errors", message="detect errors"),
-        cl.Starter(label="Fix All", message="fix all"),
-        cl.Starter(label="Download", message="download"),
+        cl.Starter(
+            label="📊 Profile My Data",
+            message="Profile my data quality — check CRS, validity, duplicates, and feature statistics.",
+            icon="/public/favicon.png",
+        ),
+        cl.Starter(
+            label="🔍 Detect Errors",
+            message="Run the full quality check pipeline — detect overlaps, boundary violations, invalid geometries, and road conflicts.",
+            icon="/public/favicon.png",
+        ),
+        cl.Starter(
+            label="🔧 Auto-Fix Everything",
+            message="Detect all errors and automatically fix what you can. Show me the results.",
+            icon="/public/favicon.png",
+        ),
+        cl.Starter(
+            label="💡 What Can You Do?",
+            message="What are your capabilities? Give me a quick overview of what GeoFix can help with.",
+            icon="/public/favicon.png",
+        ),
+    ]
+
+
+@cl.set_chat_profiles
+async def chat_profile():
+    return [
+        cl.ChatProfile(
+            name="Auto",
+            markdown_description="Automatically routes to the best model based on query complexity.",
+            icon="/public/favicon.png",
+            default=True,
+        ),
+        cl.ChatProfile(
+            name="Speed",
+            markdown_description="Llama 3.2 — fast responses for simple queries.",
+            icon="/public/favicon.png",
+        ),
+        cl.ChatProfile(
+            name="Deep Think",
+            markdown_description="DeepSeek R1 — deep reasoning for complex analysis.",
+            icon="/public/favicon.png",
+        ),
     ]
 
 
 @cl.on_chat_start
 async def start():
     """Initialise the agent, audit logger, conversation, and temp directory."""
-    agent = create_agent()
+    # Determine model from chat profile
+    profile = cl.user_session.get("chat_profile", "Auto")
+    profile_model_map = {
+        "Auto": None,
+        "Speed": "llama3.2",
+        "Deep Think": "deepseek-r1:14b",
+    }
+    model_name = profile_model_map.get(profile)
+
+    agent = create_agent(model_name=model_name) if model_name else create_agent()
     cl.user_session.set("agent", agent)
     cl.user_session.set("chat_history", [])
-    cl.user_session.set("user_model_override", None)
+    cl.user_session.set("user_model_override", model_name)
 
     # Audit logger
     audit = AuditLogger(DEFAULT_CONFIG.audit_db_path)
@@ -91,13 +138,13 @@ async def start():
     conv_id = _conv_store.create_conversation()
     cl.user_session.set("conversation_id", conv_id)
 
-    # Model selector
+    # Model selector in settings
     settings = await cl.ChatSettings(
         [
             cl.input_widget.Select(
                 id="Model",
                 label="AI Model",
-                values=["Auto", "Speed (Llama 3.2)", "Smart (Llama 3.1)"],
+                values=["Auto", "Speed (Llama 3.2)", "Smart (Llama 3.1)", "Deep (DeepSeek R1)"],
                 initial_index=0,
             )
         ]
@@ -142,6 +189,7 @@ async def setup_agent(settings):
         "Auto": None,
         "Speed (Llama 3.2)": "llama3.2",
         "Smart (Llama 3.1)": "llama3.1:latest",
+        "Deep (DeepSeek R1)": "deepseek-r1:14b",
     }
     selected = settings["Model"]
     model_name = model_map.get(selected)

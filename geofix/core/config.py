@@ -48,11 +48,17 @@ class CacheConfig:
     ttl_seconds: int = 3600
 
 
+
+import os
+
+IS_FLY = "FLY_APP_NAME" in os.environ
+DATA_DIR = Path("/data") if IS_FLY else Path("data")
+
 @dataclass(frozen=True)
 class ConversationConfig:
     """Conversation persistence settings."""
 
-    db_path: Path = Path("geofix_conversations.db")
+    db_path: Path = DATA_DIR / "geofix_conversations.db"
     max_history_messages: int = 50
 
 
@@ -77,9 +83,10 @@ class GeoFixConfig:
     conversations: ConversationConfig = field(default_factory=ConversationConfig)
     router: RouterConfig = field(default_factory=RouterConfig)
 
-    audit_db_path: Path = Path("geofix_audit.db")
-    output_dir: Path = Path("geofix_output")
-    temp_dir: Path = Path("_geofix_temp")
+    audit_db_path: Path = DATA_DIR / "geofix_audit.db"
+    output_dir: Path = DATA_DIR / "geofix_output" if IS_FLY else Path("geofix_output")
+    temp_dir: Path = Path("/tmp") if IS_FLY else Path("_geofix_temp")
 
 
 DEFAULT_CONFIG = GeoFixConfig()
+

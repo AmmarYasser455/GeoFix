@@ -36,9 +36,29 @@ CREATE TABLE IF NOT EXISTS messages (
     FOREIGN KEY(conversation_id) REFERENCES conversations(id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS geospatial_projects (
+    id              TEXT PRIMARY KEY,
+    conversation_id TEXT NOT NULL,
+    file_name       TEXT NOT NULL,
+    file_path       TEXT NOT NULL,
+    file_format     TEXT DEFAULT '',
+    crs             TEXT DEFAULT '',
+    feature_count   INTEGER DEFAULT 0,
+    bbox_minx       REAL,
+    bbox_miny       REAL,
+    bbox_maxx       REAL,
+    bbox_maxy       REAL,
+    quality_score   INTEGER DEFAULT -1,
+    error_count     INTEGER DEFAULT 0,
+    created_at      TEXT NOT NULL,
+    updated_at      TEXT NOT NULL,
+    FOREIGN KEY(conversation_id) REFERENCES conversations(id) ON DELETE CASCADE
+);
+
 CREATE INDEX IF NOT EXISTS idx_conv_updated ON conversations(updated_at);
 CREATE INDEX IF NOT EXISTS idx_msg_conv ON messages(conversation_id);
 CREATE INDEX IF NOT EXISTS idx_msg_ts ON messages(timestamp);
+CREATE INDEX IF NOT EXISTS idx_proj_conv ON geospatial_projects(conversation_id);
 """
 
 

@@ -21,7 +21,11 @@ MAX_HISTORY_MESSAGES = 40
 MAX_AGENT_STEPS = 10
 
 
-def _create_llm(config: GeoFixConfig, model_override: str | None = None):
+def _create_llm(
+    config: GeoFixConfig,
+    model_override: str | None = None,
+    api_key: str | None = None,
+):
     """Create the LLM instance based on config.llm.provider."""
     provider = config.llm.provider
     model = model_override or config.llm.model
@@ -40,6 +44,8 @@ def _create_llm(config: GeoFixConfig, model_override: str | None = None):
         return ChatGoogleGenerativeAI(
             model=model,
             temperature=config.llm.temperature,
+            google_api_key=api_key or config.llm.api_key,
+            convert_system_message_to_human=True,
             max_output_tokens=config.llm.max_tokens,
         )
     else:
@@ -67,9 +73,16 @@ class GeoFixAgent:
     Uses ``bind_tools`` so the LLM can invoke GeoFix tools directly.
     """
 
-    def __init__(self, config: GeoFixConfig = DEFAULT_CONFIG):
+    def __init__(
+        self,
+        config: GeoFixConfig = DEFAULT_CONFIG,
+        model_name: str | None = None,
+        api_key: str | None = None,
+    ):
         self.config = config
-        self.llm = _create_llm(config)
+        self.model_name = model_name or config.llm.model
+        self.api_key = api_key
+        self.llm = _create_llm(config, self.model_name, self.api_key)
         self.llm_with_tools = self.llm.bind_tools(ALL_TOOLS)
         self.system_msg = SystemMessage(content=SYSTEM_PROMPT)
 

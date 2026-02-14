@@ -1,3 +1,10 @@
+# Data
+data/*
+!data/.keep
+*.db
+*.db-shm
+*.db-wal
+
 # Python
 __pycache__/
 *.pyc

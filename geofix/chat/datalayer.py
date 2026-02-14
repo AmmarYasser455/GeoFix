@@ -1,3 +1,4 @@
+import json
 import logging
 from typing import Optional, List, Dict, Any
 import chainlit.data as cl_data
@@ -133,4 +134,4 @@ class GeoFixDataLayer(cl_data.BaseDataLayer):
     async def close(self):
         self.store.close()
 
-import json
+

@@ -1,4 +1,8 @@
-# GeoFix 2.0 — AI-Powered Geospatial Data Correction
+# GeoFix 2.1 — AI-Powered Geospatial Data Correction
+
+<p align="center">
+  <img src="public/img/logo_croped.png" alt="GeoFix Logo" width="200"/>
+</p>
 
 [![CI](https://github.com/AmmarYasser455/GeoFix/actions/workflows/ci.yml/badge.svg)](https://github.com/AmmarYasser455/GeoFix/actions/workflows/ci.yml)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://python.org)
@@ -6,8 +10,14 @@
 
 **GeoFix** is an autonomous AI agent that detects and fixes errors in geospatial data (Shapefiles, GeoJSON, GeoPackage). It runs **100% locally** using Ollama and Chainlit, providing a secure and free alternative to cloud-based solutions.
 
+## Demo
+
+![GeoFix Chat Interface](public/img/page.png)
+
 ## Features
 
+- **One-Liner API** — `geofix.analyze("data.shp")` for instant quality assessment
+- **CLI** — `geofix analyze data.shp --auto-fix` from the command line
 - **Local AI Intelligence** — Powered by Llama 3.2 / 3.1 / DeepSeek R1 via Ollama
 - **Automated QC Pipeline** — Detects topology errors (overlaps, gaps, slivers, road conflicts)
 - **Intelligent Model Routing** — Auto-selects the optimal model based on query complexity
@@ -16,12 +26,14 @@
 - **Conversation History** — Persistent SQLite-backed conversation storage with search
 - **Three-Tier Decision Engine** — Rules → LLM → Human review with full audit trail
 - **Modern UI** — Glassmorphism dark theme with smooth animations
-- **One-Click Export** — Download corrected datasets instantly
+- **93 Tests** — Comprehensive test suite with CI
 
 ## Architecture
 
 ```
 geofix/
+├── api.py             # One-liner API (analyze, validate, fix)
+├── cli.py             # Click-based CLI
 ├── core/              # Config, models, cache, router
 ├── chat/              # Chainlit app, LangChain agent, tools
 ├── decision/          # Three-tier engine (rules, LLM, human review)
@@ -44,11 +56,6 @@ geofix/
    ```bash
    ollama pull llama3.2
    ```
-   Optional (for smarter responses):
-   ```bash
-   ollama pull llama3.1:8b
-   ollama pull deepseek-r1:14b
-   ```
 
 ### Installation
 
@@ -58,12 +65,31 @@ cd GeoFix
 pip install -e .
 ```
 
-### Usage
+### Python API
+
+```python
+import geofix
+
+# Analyse a dataset
+result = geofix.analyze("buildings.shp")
+print(result.summary())
+
+# Auto-fix and save
+geofix.fix("buildings.shp", "corrected.gpkg")
+```
+
+### CLI
 
 ```bash
-geofix
-# OR
-chainlit run geofix/chat/app.py
+geofix analyze data.shp                              # quality report
+geofix analyze data.shp --auto-fix -o fixed.gpkg     # fix & save
+geofix chat                                           # launch AI assistant
+```
+
+### Chat Interface
+
+```bash
+geofix chat
 ```
 
 Open **http://localhost:8080** in your browser.

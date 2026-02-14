@@ -1,39 +1,52 @@
 /* ============================================================
-   GeoFix 2.0 — Chatbot UI Dark Theme
-   Clean, minimal, pure black aesthetic
+   GeoFix 2.1 — Premium Dark Theme
+   Deep dark aesthetic with teal accents and micro-animations
    ============================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
 /* ── CSS Variables ──────────────────────────────────────────── */
 :root {
-  /* Pure Dark Palette */
-  --gf-bg-primary: #000000;
-  --gf-bg-secondary: #0d0d0d;
-  --gf-bg-chat: #141414;
-  --gf-bg-sidebar: #000000;
-  --gf-bg-input: #1a1a1a;
-  --gf-bg-hover: #1f1f1f;
-  --gf-bg-active: #262626;
+  /* Deep Dark Palette */
+  --gf-bg-primary: #09090b;
+  --gf-bg-secondary: #0f0f12;
+  --gf-bg-chat: #111114;
+  --gf-bg-sidebar: #09090b;
+  --gf-bg-input: #18181b;
+  --gf-bg-hover: #1e1e22;
+  --gf-bg-active: #27272a;
+  --gf-bg-elevated: #1c1c20;
 
-  --gf-text-primary: #e5e5e5;
-  --gf-text-secondary: #a3a3a3;
-  --gf-text-muted: #737373;
-  --gf-text-placeholder: #525252;
+  /* Text */
+  --gf-text-primary: #f4f4f5;
+  --gf-text-secondary: #a1a1aa;
+  --gf-text-muted: #71717a;
+  --gf-text-placeholder: #52525b;
 
-  /* Accent */
-  --gf-accent: #ffffff;
-  --gf-accent-subtle: rgba(255, 255, 255, 0.08);
-  --gf-accent-blue: #3b82f6;
+  /* Teal Accent Palette */
+  --gf-accent: #2dd4bf;
+  --gf-accent-hover: #5eead4;
+  --gf-accent-subtle: rgba(45, 212, 191, 0.08);
+  --gf-accent-glow: rgba(45, 212, 191, 0.15);
+  --gf-accent-blue: #38bdf8;
 
-  --gf-border: rgba(255, 255, 255, 0.08);
-  --gf-border-hover: rgba(255, 255, 255, 0.15);
+  /* Borders */
+  --gf-border: rgba(255, 255, 255, 0.06);
+  --gf-border-hover: rgba(255, 255, 255, 0.12);
+  --gf-border-accent: rgba(45, 212, 191, 0.25);
 
-  --gf-font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  /* Typography */
+  --gf-font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --gf-font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+
+  /* Layout */
   --gf-radius: 12px;
   --gf-radius-sm: 8px;
   --gf-radius-lg: 16px;
-  --gf-transition: 150ms ease;
+  --gf-radius-xl: 20px;
+  --gf-transition: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --gf-shadow: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
+  --gf-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
 /* ── Base Reset ─────────────────────────────────────────────── */
@@ -43,6 +56,7 @@ body {
   color: var(--gf-text-primary) !important;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  letter-spacing: -0.011em;
 }
 
 /* ── Sidebar ────────────────────────────────────────────────── */
@@ -56,9 +70,9 @@ nav {
 /* New Chat button */
 .cl-sidebar button[class*="new"],
 .cl-sidebar a[class*="new"] {
-  background: transparent !important;
-  border: 1px solid var(--gf-border) !important;
-  color: var(--gf-text-primary) !important;
+  background: linear-gradient(135deg, rgba(45, 212, 191, 0.08), rgba(45, 212, 191, 0.03)) !important;
+  border: 1px solid var(--gf-border-accent) !important;
+  color: var(--gf-accent) !important;
   border-radius: var(--gf-radius-sm) !important;
   font-weight: 500 !important;
   transition: all var(--gf-transition) !important;
@@ -66,8 +80,10 @@ nav {
 
 .cl-sidebar button[class*="new"]:hover,
 .cl-sidebar a[class*="new"]:hover {
-  background: var(--gf-bg-hover) !important;
-  border-color: var(--gf-border-hover) !important;
+  background: linear-gradient(135deg, rgba(45, 212, 191, 0.15), rgba(45, 212, 191, 0.06)) !important;
+  border-color: var(--gf-accent) !important;
+  box-shadow: 0 0 20px var(--gf-accent-glow) !important;
+  transform: translateY(-1px) !important;
 }
 
 /* Search input in sidebar */
@@ -77,6 +93,12 @@ nav {
   color: var(--gf-text-primary) !important;
   border-radius: var(--gf-radius-sm) !important;
   font-family: var(--gf-font) !important;
+  transition: border-color var(--gf-transition) !important;
+}
+
+.cl-sidebar input:focus {
+  border-color: var(--gf-border-accent) !important;
+  box-shadow: 0 0 0 3px var(--gf-accent-subtle) !important;
 }
 
 .cl-sidebar input::placeholder {
@@ -88,22 +110,33 @@ nav {
 .cl-sidebar [class*="conversation"] {
   color: var(--gf-text-secondary) !important;
   border-radius: var(--gf-radius-sm) !important;
-  transition: background var(--gf-transition) !important;
+  transition: all var(--gf-transition) !important;
+  border-left: 2px solid transparent !important;
 }
 
 .cl-sidebar [class*="thread"]:hover,
 .cl-sidebar [class*="conversation"]:hover {
   background: var(--gf-bg-hover) !important;
   color: var(--gf-text-primary) !important;
+  border-left-color: var(--gf-accent) !important;
+}
+
+/* Active conversation */
+.cl-sidebar [class*="thread"][class*="active"],
+.cl-sidebar [class*="conversation"][class*="active"] {
+  background: var(--gf-accent-subtle) !important;
+  color: var(--gf-text-primary) !important;
+  border-left-color: var(--gf-accent) !important;
 }
 
 /* Sidebar icons */
 .cl-sidebar svg {
   color: var(--gf-text-muted) !important;
+  transition: color var(--gf-transition) !important;
 }
 
 .cl-sidebar svg:hover {
-  color: var(--gf-text-primary) !important;
+  color: var(--gf-accent) !important;
 }
 
 /* ── Main Chat Area ─────────────────────────────────────────── */
@@ -118,21 +151,29 @@ header,
 [class*="header"] {
   background-color: var(--gf-bg-chat) !important;
   border-bottom: 1px solid var(--gf-border) !important;
+  backdrop-filter: blur(12px) !important;
+}
+
+/* Header title styling */
+header [class*="title"],
+header h1 {
+  font-weight: 600 !important;
+  letter-spacing: -0.02em !important;
 }
 
 /* ── Messages ───────────────────────────────────────────────── */
 .cl-message {
   background: transparent !important;
   border: none !important;
-  padding: 16px 20px !important;
+  padding: 20px 24px !important;
   border-radius: 0 !important;
-  animation: fadeIn 0.3s ease-out;
+  animation: msgSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-@keyframes fadeIn {
+@keyframes msgSlideIn {
   from {
     opacity: 0;
-    transform: translateY(4px);
+    transform: translateY(8px);
   }
 
   to {
@@ -141,7 +182,7 @@ header,
   }
 }
 
-/* User messages */
+/* User messages — subtle right-aligned feel */
 .cl-message[class*="user"] {
   background: transparent !important;
 }
@@ -155,12 +196,12 @@ header,
 .cl-message-content {
   color: var(--gf-text-primary) !important;
   font-size: 15px !important;
-  line-height: 1.7 !important;
+  line-height: 1.75 !important;
   letter-spacing: -0.01em !important;
 }
 
 .cl-message-content p {
-  margin-bottom: 8px !important;
+  margin-bottom: 10px !important;
 }
 
 /* ── Avatar ──────────────────────────────────────────────────── */
@@ -170,8 +211,14 @@ header,
   height: 32px !important;
   border-radius: 8px !important;
   object-fit: contain !important;
-  background: var(--gf-bg-secondary) !important;
+  background: var(--gf-bg-elevated) !important;
   border: 1px solid var(--gf-border) !important;
+  transition: border-color var(--gf-transition) !important;
+}
+
+.cl-message-avatar img:hover,
+.MuiAvatar-img:hover {
+  border-color: var(--gf-accent) !important;
 }
 
 .MuiAvatar-root {
@@ -184,7 +231,7 @@ header,
 [class*="composer"] {
   background-color: var(--gf-bg-chat) !important;
   border-top: none !important;
-  padding: 12px 20px 24px !important;
+  padding: 12px 24px 28px !important;
 }
 
 textarea,
@@ -196,17 +243,17 @@ textarea,
   color: var(--gf-text-primary) !important;
   font-family: var(--gf-font) !important;
   font-size: 15px !important;
-  padding: 14px 16px !important;
-  transition: border-color var(--gf-transition) !important;
+  padding: 14px 18px !important;
+  transition: all var(--gf-transition) !important;
   resize: none !important;
 }
 
 textarea:focus,
 .cl-textarea:focus,
 [class*="composer"] textarea:focus {
-  border-color: var(--gf-border-hover) !important;
+  border-color: var(--gf-border-accent) !important;
   outline: none !important;
-  box-shadow: none !important;
+  box-shadow: 0 0 0 3px var(--gf-accent-subtle), var(--gf-shadow) !important;
 }
 
 textarea::placeholder,
@@ -217,48 +264,56 @@ textarea::placeholder,
 /* Send button */
 .cl-send-button,
 button[class*="send"] {
-  background: var(--gf-text-primary) !important;
+  background: var(--gf-accent) !important;
   color: var(--gf-bg-primary) !important;
   border: none !important;
   border-radius: var(--gf-radius-sm) !important;
-  transition: opacity var(--gf-transition) !important;
+  font-weight: 600 !important;
+  transition: all var(--gf-transition) !important;
 }
 
 .cl-send-button:hover,
 button[class*="send"]:hover {
-  opacity: 0.85 !important;
+  background: var(--gf-accent-hover) !important;
+  box-shadow: 0 0 20px var(--gf-accent-glow) !important;
+  transform: scale(1.05) !important;
 }
 
 /* Attach button */
 button[class*="attach"],
 button[class*="upload"] {
   color: var(--gf-text-muted) !important;
-  transition: color var(--gf-transition) !important;
+  transition: all var(--gf-transition) !important;
 }
 
 button[class*="attach"]:hover,
 button[class*="upload"]:hover {
-  color: var(--gf-text-primary) !important;
+  color: var(--gf-accent) !important;
+  transform: scale(1.1) !important;
 }
 
 /* ── Starter Buttons ────────────────────────────────────────── */
 .cl-starter,
 button[class*="starter"] {
-  background: var(--gf-bg-input) !important;
+  background: linear-gradient(135deg, var(--gf-bg-input), var(--gf-bg-elevated)) !important;
   border: 1px solid var(--gf-border) !important;
   color: var(--gf-text-secondary) !important;
   border-radius: var(--gf-radius) !important;
   font-family: var(--gf-font) !important;
   font-size: 14px !important;
-  padding: 12px 16px !important;
+  padding: 14px 18px !important;
   transition: all var(--gf-transition) !important;
+  position: relative !important;
+  overflow: hidden !important;
 }
 
 .cl-starter:hover,
 button[class*="starter"]:hover {
-  background: var(--gf-bg-hover) !important;
-  border-color: var(--gf-border-hover) !important;
+  background: linear-gradient(135deg, var(--gf-bg-hover), var(--gf-bg-active)) !important;
+  border-color: var(--gf-border-accent) !important;
   color: var(--gf-text-primary) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: var(--gf-shadow), 0 0 24px var(--gf-accent-subtle) !important;
 }
 
 /* ── Code Blocks ────────────────────────────────────────────── */
@@ -266,43 +321,69 @@ pre {
   background: var(--gf-bg-primary) !important;
   border: 1px solid var(--gf-border) !important;
   border-radius: var(--gf-radius-sm) !important;
-  padding: 16px !important;
+  padding: 18px !important;
   font-size: 13.5px !important;
   overflow-x: auto !important;
+  position: relative !important;
+}
+
+/* Code block header/language label */
+pre::before {
+  font-family: var(--gf-font) !important;
+  font-size: 11px !important;
+  color: var(--gf-text-muted) !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
 }
 
 code {
-  font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace !important;
+  font-family: var(--gf-font-mono) !important;
   font-size: 13.5px !important;
 }
 
 :not(pre)>code {
   background: var(--gf-accent-subtle) !important;
-  color: var(--gf-text-primary) !important;
-  padding: 2px 6px !important;
-  border-radius: 4px !important;
+  color: var(--gf-accent) !important;
+  padding: 2px 7px !important;
+  border-radius: 5px !important;
   font-size: 13px !important;
+  border: 1px solid rgba(45, 212, 191, 0.1) !important;
+}
+
+/* Copy code button */
+button[class*="copy"] {
+  color: var(--gf-text-muted) !important;
+  transition: color var(--gf-transition) !important;
+}
+
+button[class*="copy"]:hover {
+  color: var(--gf-accent) !important;
 }
 
 /* ── Tables ─────────────────────────────────────────────────── */
 table {
   border-collapse: collapse !important;
   width: 100% !important;
-  margin: 12px 0 !important;
+  margin: 16px 0 !important;
   font-size: 14px !important;
+  border-radius: var(--gf-radius-sm) !important;
+  overflow: hidden !important;
 }
 
 th {
-  background: var(--gf-bg-hover) !important;
+  background: var(--gf-bg-elevated) !important;
   color: var(--gf-text-primary) !important;
   font-weight: 600 !important;
   text-align: left !important;
-  padding: 10px 14px !important;
+  padding: 12px 16px !important;
   border-bottom: 1px solid var(--gf-border-hover) !important;
+  font-size: 13px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.04em !important;
 }
 
 td {
-  padding: 8px 14px !important;
+  padding: 10px 16px !important;
   border-bottom: 1px solid var(--gf-border) !important;
   color: var(--gf-text-secondary) !important;
 }
@@ -313,18 +394,20 @@ tr:hover td {
 
 /* ── Links ──────────────────────────────────────────────────── */
 a {
-  color: var(--gf-accent-blue) !important;
+  color: var(--gf-accent) !important;
   text-decoration: none !important;
+  transition: color var(--gf-transition) !important;
 }
 
 a:hover {
+  color: var(--gf-accent-hover) !important;
   text-decoration: underline !important;
 }
 
 /* ── Scrollbar ──────────────────────────────────────────────── */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
@@ -332,12 +415,12 @@ a:hover {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--gf-accent-glow);
 }
 
 /* ── Markdown in messages ───────────────────────────────────── */
@@ -346,25 +429,36 @@ a:hover {
 .cl-message-content h3 {
   color: var(--gf-text-primary) !important;
   font-weight: 600 !important;
-  margin-top: 16px !important;
-  margin-bottom: 8px !important;
+  margin-top: 20px !important;
+  margin-bottom: 10px !important;
+  letter-spacing: -0.02em !important;
+}
+
+.cl-message-content h1 {
+  font-size: 22px !important;
 }
 
 .cl-message-content h2 {
   font-size: 18px !important;
+  padding-bottom: 8px !important;
   border-bottom: 1px solid var(--gf-border) !important;
-  padding-bottom: 6px !important;
+}
+
+.cl-message-content h3 {
+  font-size: 16px !important;
+  color: var(--gf-accent) !important;
 }
 
 .cl-message-content ul,
 .cl-message-content ol {
-  padding-left: 20px !important;
-  margin: 8px 0 !important;
+  padding-left: 22px !important;
+  margin: 10px 0 !important;
 }
 
 .cl-message-content li {
-  margin-bottom: 4px !important;
+  margin-bottom: 6px !important;
   color: var(--gf-text-secondary) !important;
+  line-height: 1.7 !important;
 }
 
 .cl-message-content strong {
@@ -372,11 +466,24 @@ a:hover {
   font-weight: 600 !important;
 }
 
+.cl-message-content em {
+  color: var(--gf-text-secondary) !important;
+}
+
 .cl-message-content blockquote {
-  border-left: 3px solid var(--gf-border-hover) !important;
-  padding-left: 14px !important;
-  color: var(--gf-text-muted) !important;
-  margin: 12px 0 !important;
+  border-left: 3px solid var(--gf-accent) !important;
+  padding-left: 16px !important;
+  color: var(--gf-text-secondary) !important;
+  margin: 14px 0 !important;
+  background: var(--gf-accent-subtle) !important;
+  padding: 12px 16px !important;
+  border-radius: 0 var(--gf-radius-sm) var(--gf-radius-sm) 0 !important;
+}
+
+.cl-message-content hr {
+  border: none !important;
+  border-top: 1px solid var(--gf-border) !important;
+  margin: 20px 0 !important;
 }
 
 /* ── Settings Panel ─────────────────────────────────────────── */
@@ -392,10 +499,27 @@ a:hover {
   border: 1px solid var(--gf-border) !important;
   border-radius: var(--gf-radius-sm) !important;
   color: var(--gf-text-primary) !important;
+  box-shadow: var(--gf-shadow-lg) !important;
 }
 
 .MuiMenuItem-root:hover {
   background-color: var(--gf-bg-hover) !important;
+}
+
+/* Buttons */
+.MuiButton-root {
+  font-family: var(--gf-font) !important;
+  text-transform: none !important;
+  font-weight: 500 !important;
+  border-radius: var(--gf-radius-sm) !important;
+}
+
+/* Dialogs / Modals */
+.MuiDialog-paper {
+  background: var(--gf-bg-secondary) !important;
+  border: 1px solid var(--gf-border) !important;
+  border-radius: var(--gf-radius-lg) !important;
+  box-shadow: var(--gf-shadow-lg) !important;
 }
 
 /* ── Welcome / Empty State ──────────────────────────────────── */
@@ -404,31 +528,100 @@ a:hover {
   color: var(--gf-text-muted) !important;
 }
 
+/* ── Chat Profiles Badge ────────────────────────────────────── */
+[class*="profile"],
+[class*="chat-profile"] {
+  border-radius: var(--gf-radius-sm) !important;
+  transition: all var(--gf-transition) !important;
+}
+
+/* ── File Upload Indicators ─────────────────────────────────── */
+[class*="file-upload"],
+[class*="attachment"] {
+  background: var(--gf-bg-elevated) !important;
+  border: 1px dashed var(--gf-border-accent) !important;
+  border-radius: var(--gf-radius) !important;
+  transition: all var(--gf-transition) !important;
+}
+
+[class*="file-upload"]:hover,
+[class*="attachment"]:hover {
+  border-color: var(--gf-accent) !important;
+  background: var(--gf-accent-subtle) !important;
+}
+
+/* ── Tool/Step Indicators ───────────────────────────────────── */
+[class*="step"],
+[class*="tool-call"] {
+  border-left: 2px solid var(--gf-accent) !important;
+  padding-left: 12px !important;
+  margin: 8px 0 !important;
+  font-size: 13px !important;
+  color: var(--gf-text-muted) !important;
+}
+
 /* ── Typing indicator ───────────────────────────────────────── */
-@keyframes typingPulse {
+@keyframes gfPulse {
 
   0%,
   100% {
-    opacity: 0.4;
+    opacity: 0.3;
+    transform: scale(0.95);
   }
 
   50% {
     opacity: 1;
+    transform: scale(1);
   }
 }
 
 .cl-typing-indicator {
-  animation: typingPulse 1.5s ease-in-out infinite;
+  animation: gfPulse 1.8s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
+}
+
+/* ── Toast/Notifications ────────────────────────────────────── */
+[class*="toast"],
+[class*="snackbar"] {
+  background: var(--gf-bg-elevated) !important;
+  border: 1px solid var(--gf-border) !important;
+  border-radius: var(--gf-radius-sm) !important;
+  color: var(--gf-text-primary) !important;
+  box-shadow: var(--gf-shadow-lg) !important;
+}
+
+/* ── Feedback Buttons ───────────────────────────────────────── */
+button[class*="feedback"],
+button[class*="thumbs"] {
+  color: var(--gf-text-muted) !important;
+  transition: all var(--gf-transition) !important;
+}
+
+button[class*="feedback"]:hover,
+button[class*="thumbs"]:hover {
+  color: var(--gf-accent) !important;
+  transform: scale(1.15) !important;
 }
 
 /* ── Responsive ─────────────────────────────────────────────── */
 @media (max-width: 768px) {
   .cl-message {
-    padding: 10px 12px !important;
+    padding: 12px 14px !important;
   }
 
   :root {
     --gf-radius: 8px;
     --gf-radius-sm: 6px;
+    --gf-radius-lg: 12px;
   }
+
+  .cl-input-container,
+  [class*="composer"] {
+    padding: 10px 12px 20px !important;
+  }
+}
+
+/* ── Selection ──────────────────────────────────────────────── */
+::selection {
+  background: var(--gf-accent-glow) !important;
+  color: var(--gf-text-primary) !important;
 }

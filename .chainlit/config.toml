@@ -27,7 +27,7 @@ allow_origins = ["*"]
 unsafe_allow_html = false
 
 # Process and display mathematical expressions. This can clash with "$" characters in messages.
-latex = false
+latex = true
 
 # Autoscroll new user messages at the top of the window
 user_message_autoscroll = true
@@ -114,7 +114,7 @@ chat_settings_location = "sidebar"
 confirm_new_chat = true
 
 # Description of the assistant. This is used for HTML tags.
-description = "Autonomous Geospatial Data Correction — Built by Ammar Yasser Abdalazim"
+description = "AI-Powered Geospatial Data Correction — Built by Ammar Yasser Abdalazim"
 
 # Chain of Thought (CoT) display mode. Can be "hidden", "tool_call" or "full".
 cot = "full"
@@ -128,7 +128,7 @@ custom_css = "/public/theme.css"
 
 # Specify a JavaScript file that can be used to customize the user interface.
 # The JavaScript file can be served from the public directory.
-# custom_js = "/public/test.js"
+custom_js = "/public/geofix.js"
 
 # The style of alert boxes. Can be "classic" or "modern".
 alert_style = "classic"
@@ -160,13 +160,12 @@ default_avatar_file_url = ""
 # Be careful: If this is a relative path, it should not start with a slash.
 # custom_build = "./public/build"
 
-# Specify optional one or more custom links in the header.
-# [[UI.header_links]]
-#     name = "Issues"
-#     display_name = "Report Issue"
-#     icon_url = "https://avatars.githubusercontent.com/u/128686189?s=200&v=4"
-#     url = "https://github.com/Chainlit/chainlit/issues"
-#     target = "_blank" (default)  # Optional: "_self", "_parent", "_top".
+[[UI.header_links]]
+    name = "GitHub"
+    display_name = "⭐ GitHub"
+    icon_url = "https://cdn-icons-png.flaticon.com/512/25/25231.png"
+    url = "https://github.com/AmmarYasser455/GeoFix"
+    target = "_blank"
 
 [meta]
 generated_by = "2.9.6"
